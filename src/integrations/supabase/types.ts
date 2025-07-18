@@ -14,7 +14,83 @@ export type Database = {
   }
   public: {
     Tables: {
-      [_ in never]: never
+      pesquisas: {
+        Row: {
+          agradecimento: string | null
+          ativa: boolean
+          categoria: string | null
+          created_at: string
+          followup: string | null
+          id: string
+          nome: string
+          pergunta: string
+          periodicidade: string | null
+          updated_at: string
+          user_id: string
+        }
+        Insert: {
+          agradecimento?: string | null
+          ativa?: boolean
+          categoria?: string | null
+          created_at?: string
+          followup?: string | null
+          id?: string
+          nome: string
+          pergunta: string
+          periodicidade?: string | null
+          updated_at?: string
+          user_id: string
+        }
+        Update: {
+          agradecimento?: string | null
+          ativa?: boolean
+          categoria?: string | null
+          created_at?: string
+          followup?: string | null
+          id?: string
+          nome?: string
+          pergunta?: string
+          periodicidade?: string | null
+          updated_at?: string
+          user_id?: string
+        }
+        Relationships: []
+      }
+      respostas: {
+        Row: {
+          canal: string | null
+          comentario: string | null
+          id: string
+          nota: number
+          pesquisa_id: string
+          respondido_em: string
+        }
+        Insert: {
+          canal?: string | null
+          comentario?: string | null
+          id?: string
+          nota: number
+          pesquisa_id: string
+          respondido_em?: string
+        }
+        Update: {
+          canal?: string | null
+          comentario?: string | null
+          id?: string
+          nota?: number
+          pesquisa_id?: string
+          respondido_em?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "respostas_pesquisa_id_fkey"
+            columns: ["pesquisa_id"]
+            isOneToOne: false
+            referencedRelation: "pesquisas"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
     }
     Views: {
       [_ in never]: never
