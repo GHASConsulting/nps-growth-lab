@@ -9,18 +9,35 @@ import { BarChart, Bar, XAxis, YAxis, Tooltip, ResponsiveContainer } from "recha
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/contexts/AuthContext";
 import { toast } from "@/hooks/use-toast";
-import { LogOut, Copy } from "lucide-react";
+import { LogOut, Copy, Plus, Trash2 } from "lucide-react";
+
+interface Pesquisa {
+  id: string;
+  nome: string;
+  descricao?: string;
+  periodicidade: string;
+  ativa: boolean;
+  created_at: string;
+}
+
+interface Pergunta {
+  id?: string;
+  pesquisa_id?: string;
+  texto: string;
+  tipo_resposta: 'numero' | 'campo' | 'data';
+  ordem: number;
+}
 
 export default function LovableNPS() {
   const { user, signOut } = useAuth();
-  const [pesquisas, setPesquisas] = useState([]);
+  const [pesquisas, setPesquisas] = useState<Pesquisa[]>([]);
   const [respostas, setRespostas] = useState([]);
   const [nome, setNome] = useState("");
-  const [pergunta, setPergunta] = useState("");
-  const [agradecimento, setAgradecimento] = useState("");
-  const [followup, setFollowup] = useState("");
-  const [categoria, setCategoria] = useState("");
+  const [descricao, setDescricao] = useState("");
   const [periodicidade, setPeriodicidade] = useState("");
+  const [perguntas, setPerguntas] = useState<Pergunta[]>([
+    { texto: "", tipo_resposta: 'numero', ordem: 1 }
+  ]);
   const [loading, setLoading] = useState(false);
 
   useEffect(() => {
@@ -61,11 +78,12 @@ export default function LovableNPS() {
       const { data, error } = await supabase
         .from('respostas')
         .select(`
-          nota,
+          valor_numero,
           pesquisa_id,
           pesquisas!inner(user_id)
         `)
-        .eq('pesquisas.user_id', user?.id);
+        .eq('pesquisas.user_id', user?.id)
+        .not('valor_numero', 'is', null);
 
       if (error) {
         toast({
@@ -76,10 +94,10 @@ export default function LovableNPS() {
         return;
       }
 
-      // Agrupar respostas por nota
+      // Agrupar respostas por nota (só as que têm valor_numero)
       const respostasAgrupadas = [];
       for (let i = 0; i <= 10; i++) {
-        const total = data?.filter(r => r.nota === i).length || 0;
+        const total = data?.filter(r => r.valor_numero === i).length || 0;
         respostasAgrupadas.push({ nota: i.toString(), total });
       }
 
@@ -93,11 +111,34 @@ export default function LovableNPS() {
     }
   };
 
+  const adicionarPergunta = () => {
+    setPerguntas([...perguntas, { 
+      texto: "", 
+      tipo_resposta: 'numero', 
+      ordem: perguntas.length + 1 
+    }]);
+  };
+
+  const removerPergunta = (index: number) => {
+    if (perguntas.length > 1) {
+      const novasPerguntas = perguntas.filter((_, i) => i !== index);
+      // Reordenar
+      const perguntasReordenadas = novasPerguntas.map((p, i) => ({ ...p, ordem: i + 1 }));
+      setPerguntas(perguntasReordenadas);
+    }
+  };
+
+  const atualizarPergunta = (index: number, campo: keyof Pergunta, valor: any) => {
+    const novasPerguntas = [...perguntas];
+    novasPerguntas[index] = { ...novasPerguntas[index], [campo]: valor };
+    setPerguntas(novasPerguntas);
+  };
+
   const salvarPesquisa = async () => {
-    if (!nome || !pergunta) {
+    if (!nome || perguntas.some(p => !p.texto)) {
       toast({
         title: "Campos obrigatórios",
-        description: "Nome e pergunta são obrigatórios",
+        description: "Nome da pesquisa e todas as perguntas são obrigatórios",
         variant: "destructive",
       });
       return;
@@ -106,20 +147,20 @@ export default function LovableNPS() {
     setLoading(true);
 
     try {
-      const { error } = await supabase
+      // Salvar pesquisa
+      const { data: pesquisaData, error: pesquisaError } = await supabase
         .from('pesquisas')
         .insert({
           user_id: user?.id,
           nome,
-          pergunta,
-          agradecimento,
-          followup,
-          categoria,
+          descricao,
           periodicidade,
           ativa: true
-        });
+        })
+        .select()
+        .single();
 
-      if (error) {
+      if (pesquisaError) {
         toast({
           title: "Erro",
           description: "Erro ao salvar pesquisa",
@@ -128,18 +169,37 @@ export default function LovableNPS() {
         return;
       }
 
+      // Salvar perguntas
+      const perguntasParaSalvar = perguntas.map(p => ({
+        pesquisa_id: pesquisaData.id,
+        texto: p.texto,
+        tipo_resposta: p.tipo_resposta,
+        ordem: p.ordem
+      }));
+
+      const { error: perguntasError } = await supabase
+        .from('perguntas')
+        .insert(perguntasParaSalvar);
+
+      if (perguntasError) {
+        toast({
+          title: "Erro",
+          description: "Erro ao salvar perguntas",
+          variant: "destructive",
+        });
+        return;
+      }
+
       toast({
         title: "Sucesso",
-        description: "Pesquisa salva com sucesso!",
+        description: "Pesquisa e perguntas salvas com sucesso!",
       });
 
       // Limpar campos
       setNome("");
-      setPergunta("");
-      setAgradecimento("");
-      setFollowup("");
-      setCategoria("");
+      setDescricao("");
       setPeriodicidade("");
+      setPerguntas([{ texto: "", tipo_resposta: 'numero', ordem: 1 }]);
 
       // Recarregar pesquisas
       carregarPesquisas();
@@ -199,11 +259,16 @@ export default function LovableNPS() {
         <TabsContent value="pesquisa">
           <Card>
             <CardContent className="space-y-4 pt-6">
-              <Input placeholder="Nome da Pesquisa" value={nome} onChange={(e) => setNome(e.target.value)} />
-              <Textarea placeholder="Pergunta NPS" value={pergunta} onChange={(e) => setPergunta(e.target.value)} />
-              <Textarea placeholder="Mensagem de Agradecimento" value={agradecimento} onChange={(e) => setAgradecimento(e.target.value)} />
-              <Textarea placeholder="Pergunta de Follow-up" value={followup} onChange={(e) => setFollowup(e.target.value)} />
-              <Input placeholder="Categoria / Setor" value={categoria} onChange={(e) => setCategoria(e.target.value)} />
+              <Input 
+                placeholder="Nome da Pesquisa" 
+                value={nome} 
+                onChange={(e) => setNome(e.target.value)} 
+              />
+              <Textarea 
+                placeholder="Descrição da pesquisa (opcional)" 
+                value={descricao} 
+                onChange={(e) => setDescricao(e.target.value)} 
+              />
               <Select value={periodicidade} onValueChange={setPeriodicidade}>
                 <SelectTrigger>
                   <SelectValue placeholder="Periodicidade" />
@@ -215,6 +280,56 @@ export default function LovableNPS() {
                   <SelectItem value="trimestral">Trimestral</SelectItem>
                 </SelectContent>
               </Select>
+
+              <div className="space-y-4">
+                <div className="flex justify-between items-center">
+                  <h3 className="text-lg font-semibold">Perguntas</h3>
+                  <Button 
+                    variant="outline" 
+                    size="sm" 
+                    onClick={adicionarPergunta}
+                  >
+                    <Plus className="h-4 w-4 mr-2" />
+                    Adicionar Pergunta
+                  </Button>
+                </div>
+
+                {perguntas.map((pergunta, index) => (
+                  <div key={index} className="p-4 border rounded-lg space-y-3">
+                    <div className="flex justify-between items-center">
+                      <span className="text-sm font-medium">Pergunta {index + 1}</span>
+                      {perguntas.length > 1 && (
+                        <Button
+                          variant="outline"
+                          size="sm"
+                          onClick={() => removerPergunta(index)}
+                        >
+                          <Trash2 className="h-4 w-4" />
+                        </Button>
+                      )}
+                    </div>
+                    <Input
+                      placeholder="Digite sua pergunta"
+                      value={pergunta.texto}
+                      onChange={(e) => atualizarPergunta(index, 'texto', e.target.value)}
+                    />
+                    <Select
+                      value={pergunta.tipo_resposta}
+                      onValueChange={(value) => atualizarPergunta(index, 'tipo_resposta', value)}
+                    >
+                      <SelectTrigger>
+                        <SelectValue placeholder="Tipo de resposta" />
+                      </SelectTrigger>
+                      <SelectContent>
+                        <SelectItem value="numero">Número (0-10)</SelectItem>
+                        <SelectItem value="campo">Campo de texto</SelectItem>
+                        <SelectItem value="data">Data</SelectItem>
+                      </SelectContent>
+                    </Select>
+                  </div>
+                ))}
+              </div>
+
               <Button className="w-full" onClick={salvarPesquisa} disabled={loading}>
                 {loading ? 'Salvando...' : 'Salvar Pesquisa'}
               </Button>
@@ -225,16 +340,17 @@ export default function LovableNPS() {
                   {pesquisas.length === 0 ? (
                     <p className="text-muted-foreground">Nenhuma pesquisa criada ainda.</p>
                   ) : (
-                    pesquisas.map((pesquisa: any) => (
+                    pesquisas.map((pesquisa) => (
                       <div key={pesquisa.id} className="p-4 border rounded-lg">
                         <div className="flex justify-between items-start">
                           <div>
                             <h4 className="font-medium">{pesquisa.nome}</h4>
-                            <p className="text-sm text-muted-foreground mt-1">
-                              {pesquisa.pergunta}
-                            </p>
+                            {pesquisa.descricao && (
+                              <p className="text-sm text-muted-foreground mt-1">
+                                {pesquisa.descricao}
+                              </p>
+                            )}
                             <p className="text-xs text-muted-foreground mt-2">
-                              Categoria: {pesquisa.categoria || 'N/A'} | 
                               Periodicidade: {pesquisa.periodicidade || 'N/A'}
                             </p>
                           </div>
