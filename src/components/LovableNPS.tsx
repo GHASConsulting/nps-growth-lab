@@ -1,9 +1,9 @@
 import React, { useState, useEffect } from "react";
-import { Routes, Route, Link } from "react-router-dom";
 import { Card, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
+import { Tabs, TabsList, TabsTrigger, TabsContent } from "@/components/ui/tabs";
 import { Select, SelectTrigger, SelectValue, SelectContent, SelectItem } from "@/components/ui/select";
 import { BarChart, Bar, XAxis, YAxis, Tooltip, ResponsiveContainer } from "recharts";
 import { format } from "date-fns";
@@ -76,17 +76,21 @@ export default function LovableNPS() {
   });
 
   return (
-    <div className="min-h-screen bg-white text-black">
-      <nav className="p-4 border-b flex gap-6 text-lg font-medium">
-        <Link to="/pesquisas" className="hover:underline">Gestão de Pesquisas</Link>
-        <Link to="/dashboard" className="hover:underline">Dashboard</Link>
-        <Link to="/config" className="hover:underline">Administração</Link>
-        <Link to="/integracoes" className="hover:underline">Integrações</Link>
-      </nav>
+    <div className="p-6 space-y-6">
+      <div className="flex justify-between items-center">
+        <h1 className="text-3xl font-bold">NPS GHAS</h1>
+      </div>
 
-      <Routes>
-        <Route path="/pesquisas" element={
-          <Card className="m-6">
+      <Tabs defaultValue="pesquisa" className="w-full">
+        <TabsList className="grid w-full grid-cols-4">
+          <TabsTrigger value="pesquisa">Gestão de Pesquisas</TabsTrigger>
+          <TabsTrigger value="dashboard">Dashboard</TabsTrigger>
+          <TabsTrigger value="config">Administração</TabsTrigger>
+          <TabsTrigger value="integracoes">Integrações</TabsTrigger>
+        </TabsList>
+
+        <TabsContent value="pesquisa">
+          <Card>
             <CardContent className="space-y-4 pt-6">
               <h2 className="text-xl font-semibold">Criar Pesquisa</h2>
               <Input placeholder="Nome da Pesquisa" value={nome} onChange={(e) => setNome(e.target.value)} />
@@ -117,10 +121,10 @@ export default function LovableNPS() {
               ))}
             </CardContent>
           </Card>
-        } />
+        </TabsContent>
 
-        <Route path="/dashboard" element={
-          <Card className="m-6">
+        <TabsContent value="dashboard">
+          <Card>
             <CardContent className="space-y-4 pt-6">
               <h2 className="text-xl font-semibold">Dashboard</h2>
               <Input placeholder="Filtrar por Nome" value={filtroNome} onChange={(e) => setFiltroNome(e.target.value)} />
@@ -161,10 +165,10 @@ export default function LovableNPS() {
               <Button className="bg-[#5a89a3] text-white" onClick={enviarResposta}>Enviar</Button>
             </CardContent>
           </Card>
-        } />
+        </TabsContent>
 
-        <Route path="/config" element={
-          <Card className="m-6">
+        <TabsContent value="config">
+          <Card>
             <CardContent className="space-y-4 pt-6">
               <h2 className="text-xl font-semibold">Administração</h2>
               
@@ -230,9 +234,10 @@ export default function LovableNPS() {
               <Button className="w-full bg-[#5a89a3] text-white">Salvar Configurações</Button>
             </CardContent>
           </Card>
-        } />
-        <Route path="/integracoes" element={
-          <Card className="m-6">
+        </TabsContent>
+
+        <TabsContent value="integracoes">
+          <Card>
             <CardContent className="space-y-4 pt-6">
               <h2 className="text-xl font-semibold">Integrações</h2>
               
@@ -319,8 +324,8 @@ export default function LovableNPS() {
               <Button className="w-full bg-[#5a89a3] text-white">Salvar Integrações</Button>
             </CardContent>
           </Card>
-        } />
-      </Routes>
+        </TabsContent>
+      </Tabs>
     </div>
   );
 }
