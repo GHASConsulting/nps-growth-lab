@@ -163,8 +163,163 @@ export default function LovableNPS() {
           </Card>
         } />
 
-        <Route path="/config" element={<div className="p-6">Administração (em construção)</div>} />
-        <Route path="/integracoes" element={<div className="p-6">Integrações (em construção)</div>} />
+        <Route path="/config" element={
+          <Card className="m-6">
+            <CardContent className="space-y-4 pt-6">
+              <h2 className="text-xl font-semibold">Administração</h2>
+              
+              <div className="space-y-4">
+                <h3 className="text-lg font-medium">Configurações Gerais</h3>
+                <Input placeholder="Nome da Empresa" />
+                <Input placeholder="Logotipo da empresa (URL)" />
+                <Textarea placeholder="Mensagem personalizada de boas-vindas" />
+                <Input placeholder="E-mail de contato para suporte" />
+              </div>
+
+              <div className="space-y-4">
+                <h3 className="text-lg font-medium">Personalização Visual</h3>
+                <Input placeholder="Cor primária (hex - ex: #5a89a3)" />
+                <Input placeholder="Cor secundária (hex)" />
+                <Input placeholder="URL do favicon" />
+                <Select>
+                  <SelectTrigger>
+                    <SelectValue placeholder="Tema padrão" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="claro">Claro</SelectItem>
+                    <SelectItem value="escuro">Escuro</SelectItem>
+                    <SelectItem value="auto">Automático</SelectItem>
+                  </SelectContent>
+                </Select>
+              </div>
+
+              <div className="space-y-4">
+                <h3 className="text-lg font-medium">Gestão de Usuários</h3>
+                <Select>
+                  <SelectTrigger>
+                    <SelectValue placeholder="Seu nível de acesso" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="admin">Administrador</SelectItem>
+                    <SelectItem value="editor">Editor</SelectItem>
+                    <SelectItem value="leitor">Somente Leitura</SelectItem>
+                  </SelectContent>
+                </Select>
+                <Input placeholder="Convidar usuário por e-mail" />
+                <Button variant="outline">Enviar Convite</Button>
+              </div>
+
+              <div className="space-y-4">
+                <h3 className="text-lg font-medium">Configurações de Notificação</h3>
+                <div className="space-y-2">
+                  <label className="flex items-center space-x-2">
+                    <input type="checkbox" defaultChecked />
+                    <span>Notificar por e-mail sobre novas respostas</span>
+                  </label>
+                  <label className="flex items-center space-x-2">
+                    <input type="checkbox" />
+                    <span>Relatório semanal automático</span>
+                  </label>
+                  <label className="flex items-center space-x-2">
+                    <input type="checkbox" defaultChecked />
+                    <span>Alertas de NPS baixo</span>
+                  </label>
+                </div>
+              </div>
+
+              <Button className="w-full bg-[#5a89a3] text-white">Salvar Configurações</Button>
+            </CardContent>
+          </Card>
+        } />
+        <Route path="/integracoes" element={
+          <Card className="m-6">
+            <CardContent className="space-y-4 pt-6">
+              <h2 className="text-xl font-semibold">Integrações</h2>
+              
+              <div className="space-y-4">
+                <h3 className="text-lg font-medium">Automação e Webhooks</h3>
+                <Input placeholder="URL de Webhook (ex: Zapier/Make)" />
+                <Input placeholder="Token de autenticação" />
+                <Button variant="outline">Testar Webhook</Button>
+              </div>
+
+              <div className="space-y-4">
+                <h3 className="text-lg font-medium">Integração com CRM/ERP</h3>
+                <Select>
+                  <SelectTrigger>
+                    <SelectValue placeholder="Selecione o sistema" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="salesforce">Salesforce</SelectItem>
+                    <SelectItem value="hubspot">HubSpot</SelectItem>
+                    <SelectItem value="pipedrive">Pipedrive</SelectItem>
+                    <SelectItem value="sap">SAP</SelectItem>
+                    <SelectItem value="outro">Outro</SelectItem>
+                  </SelectContent>
+                </Select>
+                <Input placeholder="Chave da API" />
+                <Input placeholder="URL do endpoint" />
+                <Button variant="outline">Conectar Sistema</Button>
+              </div>
+
+              <div className="space-y-4">
+                <h3 className="text-lg font-medium">E-mail Marketing</h3>
+                <Select>
+                  <SelectTrigger>
+                    <SelectValue placeholder="Plataforma de e-mail" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="mailchimp">MailChimp</SelectItem>
+                    <SelectItem value="sendinblue">Sendinblue</SelectItem>
+                    <SelectItem value="constant-contact">Constant Contact</SelectItem>
+                    <SelectItem value="outro">Outro</SelectItem>
+                  </SelectContent>
+                </Select>
+                <Input placeholder="Chave da API de e-mail" />
+                <Button variant="outline">Conectar E-mail</Button>
+              </div>
+
+              <div className="space-y-4">
+                <h3 className="text-lg font-medium">Relatórios e BI</h3>
+                <div className="space-y-2">
+                  <label className="flex items-center space-x-2">
+                    <input type="checkbox" />
+                    <span>Integração com Google Analytics</span>
+                  </label>
+                  <label className="flex items-center space-x-2">
+                    <input type="checkbox" />
+                    <span>Exportar para Power BI</span>
+                  </label>
+                  <label className="flex items-center space-x-2">
+                    <input type="checkbox" />
+                    <span>Conectar com Tableau</span>
+                  </label>
+                </div>
+                <Input placeholder="Token de integração com BI" />
+              </div>
+
+              <div className="space-y-4">
+                <h3 className="text-lg font-medium">Status das Integrações</h3>
+                <div className="space-y-2">
+                  <div className="flex justify-between items-center p-2 border rounded">
+                    <span>Webhook Principal</span>
+                    <span className="text-green-600">✓ Conectado</span>
+                  </div>
+                  <div className="flex justify-between items-center p-2 border rounded">
+                    <span>CRM</span>
+                    <span className="text-red-600">✗ Desconectado</span>
+                  </div>
+                  <div className="flex justify-between items-center p-2 border rounded">
+                    <span>E-mail Marketing</span>
+                    <span className="text-yellow-600">⚠ Configuração Pendente</span>
+                  </div>
+                </div>
+              </div>
+
+              <Button className="w-full bg-[#5a89a3] text-white">Salvar Integrações</Button>
+            </CardContent>
+          </Card>
+        } />
       </Routes>
     </div>
   );
