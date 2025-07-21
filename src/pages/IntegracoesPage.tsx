@@ -1,4 +1,5 @@
 import React, { useState } from "react";
+import { Link } from "react-router-dom";
 import { Card, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -69,6 +70,17 @@ const IntegracoesPage = () => {
   return (
     <div className="min-h-screen bg-white text-black p-6">
       <div className="max-w-4xl mx-auto space-y-6">
+        <nav className="flex space-x-6 mb-8 border-b pb-4">
+          <Link to="/pesquisas" className="text-black hover:underline hover:text-gray-600">
+            Gestão de Pesquisa
+          </Link>
+          <Link to="/dashboard" className="text-black hover:underline hover:text-gray-600">
+            Dashboard
+          </Link>
+          <Link to="/config" className="text-black hover:underline hover:text-gray-600">
+            Administração
+          </Link>
+        </nav>
         <h1 className="text-3xl font-bold">Integrações</h1>
 
         <Card>
