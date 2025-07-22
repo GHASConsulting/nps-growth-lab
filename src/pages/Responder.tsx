@@ -5,7 +5,7 @@ import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Textarea } from '@/components/ui/textarea';
 import { supabase } from '@/integrations/supabase/client';
-import { toast } from '@/hooks/use-toast';
+import { useToast } from '@/hooks/use-toast';
 
 interface Pesquisa {
   id: string;
@@ -24,6 +24,7 @@ interface Pergunta {
 
 export default function Responder() {
   const { pesquisaId } = useParams<{ pesquisaId: string }>();
+  const { toast } = useToast();
   const [pesquisa, setPesquisa] = useState<Pesquisa | null>(null);
   const [perguntas, setPerguntas] = useState<Pergunta[]>([]);
   const [respostas, setRespostas] = useState<Record<string, any>>({});
