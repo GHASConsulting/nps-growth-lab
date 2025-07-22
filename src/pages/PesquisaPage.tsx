@@ -248,7 +248,7 @@ const PesquisaPage = () => {
               </SelectTrigger>
               <SelectContent>
                 <SelectItem value="numero">Número (0-10)</SelectItem>
-                <SelectItem value="texto">Texto</SelectItem>
+                <SelectItem value="campo">Texto</SelectItem>
                 <SelectItem value="data">Data</SelectItem>
               </SelectContent>
             </Select>
