@@ -83,7 +83,7 @@ const DashboardPage = () => {
       const matchNome = !filtroNome || (resposta.canal && resposta.canal.toLowerCase().includes(filtroNome.toLowerCase()));
       const matchEmpresa = !filtroEmpresa || (resposta.canal && resposta.canal.toLowerCase().includes(filtroEmpresa.toLowerCase()));
       const matchData = !filtroData || resposta.respondido_em.includes(filtroData);
-      const matchCategoria = !filtroCategoria || (pesquisaDaResposta?.categoria && pesquisaDaResposta.categoria === filtroCategoria);
+      const matchCategoria = !filtroCategoria || filtroCategoria === "todos" || (pesquisaDaResposta?.categoria && pesquisaDaResposta.categoria === filtroCategoria);
       return matchNome && matchEmpresa && matchData && matchCategoria;
     });
 
@@ -113,7 +113,7 @@ const DashboardPage = () => {
     const matchNome = !filtroNome || (resposta.canal && resposta.canal.toLowerCase().includes(filtroNome.toLowerCase()));
     const matchEmpresa = !filtroEmpresa || (resposta.canal && resposta.canal.toLowerCase().includes(filtroEmpresa.toLowerCase()));
     const matchData = !filtroData || resposta.respondido_em.includes(filtroData);
-    const matchCategoria = !filtroCategoria || (pesquisaDaResposta?.categoria && pesquisaDaResposta.categoria === filtroCategoria);
+    const matchCategoria = !filtroCategoria || filtroCategoria === "todos" || (pesquisaDaResposta?.categoria && pesquisaDaResposta.categoria === filtroCategoria);
     return matchNome && matchEmpresa && matchData && matchCategoria;
   });
 
@@ -160,7 +160,7 @@ const DashboardPage = () => {
                   <SelectValue placeholder="Filtrar por Categoria" />
                 </SelectTrigger>
                 <SelectContent>
-                  <SelectItem value="">Todas as categorias</SelectItem>
+                  <SelectItem value="todos">Todas as categorias</SelectItem>
                   {categoriasDisponiveis.map((categoria) => (
                     <SelectItem key={categoria} value={categoria}>
                       {categoria}
