@@ -52,6 +52,7 @@ export type Database = {
       pesquisas: {
         Row: {
           ativa: boolean
+          categoria: string | null
           created_at: string
           descricao: string | null
           id: string
@@ -62,6 +63,7 @@ export type Database = {
         }
         Insert: {
           ativa?: boolean
+          categoria?: string | null
           created_at?: string
           descricao?: string | null
           id?: string
@@ -72,6 +74,7 @@ export type Database = {
         }
         Update: {
           ativa?: boolean
+          categoria?: string | null
           created_at?: string
           descricao?: string | null
           id?: string

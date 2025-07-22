@@ -100,6 +100,7 @@ const PesquisaPage = () => {
         .from('pesquisas')
         .insert({
           nome,
+          categoria,
           descricao: agradecimento,
           periodicidade,
           user_id: (await supabase.auth.getUser()).data.user?.id
@@ -111,6 +112,7 @@ const PesquisaPage = () => {
 
       setPesquisas([data, ...pesquisas]);
       setNome("");
+      setCategoria("");
       setAgradecimento("");
       setPeriodicidade("");
       
