@@ -25,6 +25,12 @@ interface Pesquisa {
   ativa: boolean;
 }
 
+interface Categoria {
+  id: string;
+  nome: string;
+  is_nps: boolean;
+}
+
 const DashboardPage = () => {
   const [filtroNome, setFiltroNome] = useState("");
   const [filtroEmpresa, setFiltroEmpresa] = useState("");
@@ -32,18 +38,35 @@ const DashboardPage = () => {
   const [filtroCategoria, setFiltroCategoria] = useState("");
   const [respostas, setRespostas] = useState<Resposta[]>([]);
   const [pesquisas, setPesquisas] = useState<Pesquisa[]>([]);
+  const [categorias, setCategorias] = useState<Categoria[]>([]);
   const [dadosGrafico, setDadosGrafico] = useState<any[]>([]);
   const [estatisticasNPS, setEstatisticasNPS] = useState({
     promotores: 0,
     passivos: 0,
     detratores: 0,
-    total: 0
+    total: 0,
+    nps: 0
   });
 
   useEffect(() => {
     buscarRespostas();
     buscarPesquisas();
+    buscarCategorias();
   }, []);
+
+  const buscarCategorias = async () => {
+    try {
+      const { data, error } = await supabase
+        .from('categorias')
+        .select('*')
+        .order('nome');
+
+      if (error) throw error;
+      setCategorias(data || []);
+    } catch (error) {
+      console.error('Erro ao buscar categorias:', error);
+    }
+  };
 
   useEffect(() => {
     gerarDadosGrafico();
@@ -100,11 +123,15 @@ const DashboardPage = () => {
     const passivos = respostasComNota.filter(r => r.valor_numero! >= 7 && r.valor_numero! <= 8).length;
     const detratores = respostasComNota.filter(r => r.valor_numero! <= 6).length;
     
+    // Calcular NPS usando a fórmula: (Promotores - Detratores) / Total * 100
+    const nps = respostasComNota.length > 0 ? Math.round(((promotores - detratores) / respostasComNota.length) * 100) : 0;
+    
     setEstatisticasNPS({
       promotores,
       passivos,
       detratores,
-      total: respostasComNota.length
+      total: respostasComNota.length,
+      nps
     });
   };
 
@@ -117,7 +144,16 @@ const DashboardPage = () => {
     return matchNome && matchEmpresa && matchData && matchCategoria;
   });
 
-  const categoriasDisponiveis = [...new Set(pesquisas.map(p => p.categoria).filter(Boolean))];
+  // Verificar se a categoria selecionada é do tipo NPS
+  const categoriaAtual = categorias.find(cat => cat.nome === filtroCategoria);
+  const isCategoriaNPS = categoriaAtual?.is_nps || false;
+
+  // Determinar cor do NPS baseado no valor
+  const getCorNPS = (nps: number) => {
+    if (nps < 0) return "text-red-600";
+    if (nps <= 50) return "text-yellow-600";
+    return "text-green-600";
+  };
 
   return (
     <div className="min-h-screen bg-white text-black p-6">
@@ -161,9 +197,9 @@ const DashboardPage = () => {
                 </SelectTrigger>
                 <SelectContent>
                   <SelectItem value="todos">Todas as categorias</SelectItem>
-                  {categoriasDisponiveis.map((categoria) => (
-                    <SelectItem key={categoria} value={categoria}>
-                      {categoria}
+                  {categorias.map((categoria) => (
+                    <SelectItem key={categoria.id} value={categoria.nome}>
+                      {categoria.nome} {categoria.is_nps && '(NPS)'}
                     </SelectItem>
                   ))}
                 </SelectContent>
@@ -171,6 +207,28 @@ const DashboardPage = () => {
             </div>
           </CardContent>
         </Card>
+
+        {/* Indicador de NPS - só aparece se categoria selecionada for NPS */}
+        {isCategoriaNPS && (
+          <Card>
+            <CardContent className="pt-6">
+              <h2 className="text-xl font-semibold mb-4">Indicador NPS</h2>
+              <div className="text-center">
+                <div className={`text-6xl font-bold ${getCorNPS(estatisticasNPS.nps)}`}>
+                  {estatisticasNPS.nps}
+                </div>
+                <div className="text-lg text-gray-600 mt-2">
+                  Net Promoter Score
+                </div>
+                <div className="text-sm text-gray-500 mt-1">
+                  {estatisticasNPS.nps < 0 && "Zona Crítica"}
+                  {estatisticasNPS.nps >= 0 && estatisticasNPS.nps <= 50 && "Zona de Aperfeiçoamento"}
+                  {estatisticasNPS.nps > 50 && "Zona de Excelência"}
+                </div>
+              </div>
+            </CardContent>
+          </Card>
+        )}
 
         <Card>
           <CardContent className="pt-6">

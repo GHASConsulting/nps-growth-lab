@@ -23,6 +23,12 @@ interface Pergunta {
   ordem: number;
 }
 
+interface Categoria {
+  id: string;
+  nome: string;
+  is_nps: boolean;
+}
+
 const PesquisaPage = () => {
   const [nome, setNome] = useState("");
   const [followUp, setFollowUp] = useState("");
@@ -34,11 +40,27 @@ const PesquisaPage = () => {
   const [pesquisas, setPesquisas] = useState<Pesquisa[]>([]);
   const [perguntas, setPerguntas] = useState<Pergunta[]>([]);
   const [pesquisaSelecionada, setPesquisaSelecionada] = useState<string>("");
+  const [categorias, setCategorias] = useState<Categoria[]>([]);
   const { toast } = useToast();
 
   useEffect(() => {
     buscarPesquisas();
+    buscarCategorias();
   }, []);
+
+  const buscarCategorias = async () => {
+    try {
+      const { data, error } = await supabase
+        .from('categorias')
+        .select('*')
+        .order('nome');
+
+      if (error) throw error;
+      setCategorias(data || []);
+    } catch (error) {
+      console.error('Erro ao buscar categorias:', error);
+    }
+  };
 
   useEffect(() => {
     if (pesquisaSelecionada) {
@@ -212,7 +234,18 @@ const PesquisaPage = () => {
             <Input placeholder="Nome da Pesquisa" value={nome} onChange={(e) => setNome(e.target.value)} />
             <Textarea placeholder="Pergunta de Follow-up" value={followUp} onChange={(e) => setFollowUp(e.target.value)} />
             <Textarea placeholder="Mensagem de Agradecimento" value={agradecimento} onChange={(e) => setAgradecimento(e.target.value)} />
-            <Input placeholder="Categoria" value={categoria} onChange={(e) => setCategoria(e.target.value)} />
+            <Select value={categoria} onValueChange={setCategoria}>
+              <SelectTrigger>
+                <SelectValue placeholder="Selecione uma categoria" />
+              </SelectTrigger>
+              <SelectContent>
+                {categorias.map((cat) => (
+                  <SelectItem key={cat.id} value={cat.nome}>
+                    {cat.nome} {cat.is_nps && '(NPS)'}
+                  </SelectItem>
+                ))}
+              </SelectContent>
+            </Select>
             <Select value={periodicidade} onValueChange={setPeriodicidade}>
               <SelectTrigger>
                 <SelectValue placeholder="Periodicidade" />
