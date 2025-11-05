@@ -14,7 +14,152 @@ export type Database = {
   }
   public: {
     Tables: {
-      [_ in never]: never
+      categorias: {
+        Row: {
+          created_at: string
+          id: string
+          is_nps: boolean
+          nome: string
+          updated_at: string
+          user_id: string
+        }
+        Insert: {
+          created_at?: string
+          id?: string
+          is_nps?: boolean
+          nome: string
+          updated_at?: string
+          user_id: string
+        }
+        Update: {
+          created_at?: string
+          id?: string
+          is_nps?: boolean
+          nome?: string
+          updated_at?: string
+          user_id?: string
+        }
+        Relationships: []
+      }
+      perguntas: {
+        Row: {
+          created_at: string
+          id: string
+          ordem: number
+          pesquisa_id: string
+          texto: string
+          tipo_resposta: string
+        }
+        Insert: {
+          created_at?: string
+          id?: string
+          ordem: number
+          pesquisa_id: string
+          texto: string
+          tipo_resposta: string
+        }
+        Update: {
+          created_at?: string
+          id?: string
+          ordem?: number
+          pesquisa_id?: string
+          texto?: string
+          tipo_resposta?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "perguntas_pesquisa_id_fkey"
+            columns: ["pesquisa_id"]
+            isOneToOne: false
+            referencedRelation: "pesquisas"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      pesquisas: {
+        Row: {
+          ativa: boolean
+          categoria: string | null
+          created_at: string
+          descricao: string | null
+          id: string
+          nome: string
+          periodicidade: string | null
+          updated_at: string
+          user_id: string
+        }
+        Insert: {
+          ativa?: boolean
+          categoria?: string | null
+          created_at?: string
+          descricao?: string | null
+          id?: string
+          nome: string
+          periodicidade?: string | null
+          updated_at?: string
+          user_id: string
+        }
+        Update: {
+          ativa?: boolean
+          categoria?: string | null
+          created_at?: string
+          descricao?: string | null
+          id?: string
+          nome?: string
+          periodicidade?: string | null
+          updated_at?: string
+          user_id?: string
+        }
+        Relationships: []
+      }
+      respostas: {
+        Row: {
+          canal: string | null
+          id: string
+          pergunta_id: string
+          pesquisa_id: string
+          respondido_em: string
+          valor_data: string | null
+          valor_numero: number | null
+          valor_texto: string | null
+        }
+        Insert: {
+          canal?: string | null
+          id?: string
+          pergunta_id: string
+          pesquisa_id: string
+          respondido_em?: string
+          valor_data?: string | null
+          valor_numero?: number | null
+          valor_texto?: string | null
+        }
+        Update: {
+          canal?: string | null
+          id?: string
+          pergunta_id?: string
+          pesquisa_id?: string
+          respondido_em?: string
+          valor_data?: string | null
+          valor_numero?: number | null
+          valor_texto?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "respostas_pergunta_id_fkey"
+            columns: ["pergunta_id"]
+            isOneToOne: false
+            referencedRelation: "perguntas"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "respostas_pesquisa_id_fkey"
+            columns: ["pesquisa_id"]
+            isOneToOne: false
+            referencedRelation: "pesquisas"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
     }
     Views: {
       [_ in never]: never
