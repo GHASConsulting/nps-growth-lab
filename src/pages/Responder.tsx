@@ -4,6 +4,9 @@ import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Textarea } from '@/components/ui/textarea';
+import { RadioGroup, RadioGroupItem } from '@/components/ui/radio-group';
+import { Checkbox } from '@/components/ui/checkbox';
+import { Label } from '@/components/ui/label';
 import { supabase } from '@/integrations/supabase/client';
 import { useToast } from '@/hooks/use-toast';
 
@@ -18,8 +21,9 @@ interface Pergunta {
   id: string;
   pesquisa_id: string;
   texto: string;
-  tipo_resposta: 'numero' | 'campo' | 'data' | 'texto_numerico';
+  tipo_resposta: 'numero' | 'campo' | 'data' | 'texto_numerico' | 'radio' | 'checkbox';
   ordem: number;
+  opcoes?: string[];
 }
 
 export default function Responder() {
@@ -143,6 +147,12 @@ export default function Responder() {
           case 'data':
             resposta.valor_data = valor || null;
             break;
+          case 'radio':
+            resposta.valor_texto = valor || null;
+            break;
+          case 'checkbox':
+            resposta.valor_texto = Array.isArray(valor) ? valor.join(', ') : null;
+            break;
         }
 
         return resposta;
@@ -235,6 +245,46 @@ export default function Responder() {
             value={valor}
             onChange={(e) => atualizarResposta(pergunta.id, e.target.value)}
           />
+        );
+      
+      case 'radio':
+        return (
+          <RadioGroup value={valor} onValueChange={(value) => atualizarResposta(pergunta.id, value)}>
+            <div className="space-y-3">
+              {(pergunta.opcoes || []).map((opcao, index) => (
+                <div key={index} className="flex items-center space-x-2">
+                  <RadioGroupItem value={opcao} id={`${pergunta.id}-${index}`} />
+                  <Label htmlFor={`${pergunta.id}-${index}`} className="cursor-pointer">
+                    {opcao}
+                  </Label>
+                </div>
+              ))}
+            </div>
+          </RadioGroup>
+        );
+      
+      case 'checkbox':
+        const checkboxValues = Array.isArray(valor) ? valor : [];
+        return (
+          <div className="space-y-3">
+            {(pergunta.opcoes || []).map((opcao, index) => (
+              <div key={index} className="flex items-center space-x-2">
+                <Checkbox
+                  id={`${pergunta.id}-${index}`}
+                  checked={checkboxValues.includes(opcao)}
+                  onCheckedChange={(checked) => {
+                    const newValues = checked
+                      ? [...checkboxValues, opcao]
+                      : checkboxValues.filter((v: string) => v !== opcao);
+                    atualizarResposta(pergunta.id, newValues);
+                  }}
+                />
+                <Label htmlFor={`${pergunta.id}-${index}`} className="cursor-pointer">
+                  {opcao}
+                </Label>
+              </div>
+            ))}
+          </div>
         );
       
       default:

@@ -37,6 +37,8 @@ const PesquisaPage = () => {
   const [periodicidade, setPeriodicidade] = useState("");
   const [perguntaTexto, setPerguntaTexto] = useState("");
   const [tipoPergunta, setTipoPergunta] = useState("numero");
+  const [opcoes, setOpcoes] = useState<string[]>([]);
+  const [novaOpcao, setNovaOpcao] = useState("");
   const [pesquisas, setPesquisas] = useState<Pesquisa[]>([]);
   const [perguntas, setPerguntas] = useState<Pergunta[]>([]);
   const [pesquisaSelecionada, setPesquisaSelecionada] = useState<string>("");
@@ -152,11 +154,37 @@ const PesquisaPage = () => {
     }
   };
 
+  const adicionarOpcao = () => {
+    if (!novaOpcao.trim()) {
+      toast({
+        title: "Erro",
+        description: "Digite uma opção",
+        variant: "destructive",
+      });
+      return;
+    }
+    setOpcoes([...opcoes, novaOpcao.trim()]);
+    setNovaOpcao("");
+  };
+
+  const removerOpcao = (index: number) => {
+    setOpcoes(opcoes.filter((_, i) => i !== index));
+  };
+
   const adicionarPergunta = async () => {
     if (!perguntaTexto || !pesquisaSelecionada) {
       toast({
         title: "Erro",
         description: "Selecione uma pesquisa e digite a pergunta",
+        variant: "destructive",
+      });
+      return;
+    }
+
+    if ((tipoPergunta === 'radio' || tipoPergunta === 'checkbox') && opcoes.length === 0) {
+      toast({
+        title: "Erro",
+        description: "Adicione pelo menos uma opção para este tipo de pergunta",
         variant: "destructive",
       });
       return;
@@ -169,7 +197,8 @@ const PesquisaPage = () => {
           pesquisa_id: pesquisaSelecionada,
           texto: perguntaTexto,
           tipo_resposta: tipoPergunta,
-          ordem: perguntas.length + 1
+          ordem: perguntas.length + 1,
+          opcoes: (tipoPergunta === 'radio' || tipoPergunta === 'checkbox') ? opcoes : []
         })
         .select()
         .single();
@@ -178,6 +207,7 @@ const PesquisaPage = () => {
 
       setPerguntas([...perguntas, data]);
       setPerguntaTexto("");
+      setOpcoes([]);
       
       toast({
         title: "Sucesso",
@@ -277,7 +307,10 @@ const PesquisaPage = () => {
               </SelectContent>
             </Select>
             <Input placeholder="Texto da Pergunta" value={perguntaTexto} onChange={(e) => setPerguntaTexto(e.target.value)} />
-            <Select value={tipoPergunta} onValueChange={setTipoPergunta}>
+            <Select value={tipoPergunta} onValueChange={(valor) => {
+              setTipoPergunta(valor);
+              setOpcoes([]);
+            }}>
               <SelectTrigger>
                 <SelectValue placeholder="Tipo de Resposta" />
               </SelectTrigger>
@@ -286,8 +319,45 @@ const PesquisaPage = () => {
                 <SelectItem value="campo">Texto</SelectItem>
                 <SelectItem value="texto_numerico">Texto Numérico</SelectItem>
                 <SelectItem value="data">Data</SelectItem>
+                <SelectItem value="radio">Seleção Única (Radio)</SelectItem>
+                <SelectItem value="checkbox">Seleção Múltipla (Checkbox)</SelectItem>
               </SelectContent>
             </Select>
+
+            {(tipoPergunta === 'radio' || tipoPergunta === 'checkbox') && (
+              <div className="space-y-2 p-4 border rounded-lg">
+                <h3 className="font-semibold">Alternativas</h3>
+                <div className="flex gap-2">
+                  <Input
+                    placeholder="Digite uma alternativa"
+                    value={novaOpcao}
+                    onChange={(e) => setNovaOpcao(e.target.value)}
+                    onKeyPress={(e) => e.key === 'Enter' && adicionarOpcao()}
+                  />
+                  <Button type="button" onClick={adicionarOpcao} variant="outline">
+                    Adicionar
+                  </Button>
+                </div>
+                {opcoes.length > 0 && (
+                  <div className="space-y-1 mt-2">
+                    {opcoes.map((opcao, index) => (
+                      <div key={index} className="flex items-center justify-between p-2 bg-muted rounded">
+                        <span>{opcao}</span>
+                        <Button
+                          type="button"
+                          variant="ghost"
+                          size="sm"
+                          onClick={() => removerOpcao(index)}
+                        >
+                          Remover
+                        </Button>
+                      </div>
+                    ))}
+                  </div>
+                )}
+              </div>
+            )}
+
             <Button className="bg-[#5a89a3] text-white" onClick={adicionarPergunta}>Adicionar Pergunta</Button>
           </CardContent>
         </Card>
