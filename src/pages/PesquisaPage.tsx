@@ -43,6 +43,7 @@ const PesquisaPage = () => {
   const [perguntas, setPerguntas] = useState<Pergunta[]>([]);
   const [pesquisaSelecionada, setPesquisaSelecionada] = useState<string>("");
   const [categorias, setCategorias] = useState<Categoria[]>([]);
+  const [editandoPerguntaId, setEditandoPerguntaId] = useState<string | null>(null);
   const { toast } = useToast();
 
   useEffect(() => {
@@ -191,33 +192,100 @@ const PesquisaPage = () => {
     }
 
     try {
-      const { data, error } = await supabase
+      if (editandoPerguntaId) {
+        // Atualizar pergunta existente
+        const { data, error } = await supabase
+          .from('perguntas')
+          .update({
+            texto: perguntaTexto,
+            tipo_resposta: tipoPergunta,
+            opcoes: (tipoPergunta === 'radio' || tipoPergunta === 'checkbox') ? opcoes : []
+          })
+          .eq('id', editandoPerguntaId)
+          .select()
+          .single();
+
+        if (error) throw error;
+
+        setPerguntas(perguntas.map(p => p.id === editandoPerguntaId ? data : p));
+        toast({
+          title: "Sucesso",
+          description: "Pergunta atualizada com sucesso!",
+        });
+      } else {
+        // Adicionar nova pergunta
+        const { data, error } = await supabase
+          .from('perguntas')
+          .insert({
+            pesquisa_id: pesquisaSelecionada,
+            texto: perguntaTexto,
+            tipo_resposta: tipoPergunta,
+            ordem: perguntas.length + 1,
+            opcoes: (tipoPergunta === 'radio' || tipoPergunta === 'checkbox') ? opcoes : []
+          })
+          .select()
+          .single();
+
+        if (error) throw error;
+
+        setPerguntas([...perguntas, data]);
+        toast({
+          title: "Sucesso",
+          description: "Pergunta adicionada com sucesso!",
+        });
+      }
+
+      setPerguntaTexto("");
+      setOpcoes([]);
+      setEditandoPerguntaId(null);
+    } catch (error) {
+      console.error('Erro ao salvar pergunta:', error);
+      toast({
+        title: "Erro",
+        description: "Erro ao salvar pergunta",
+        variant: "destructive",
+      });
+    }
+  };
+
+  const prepararEdicao = (pergunta: Pergunta) => {
+    setPerguntaTexto(pergunta.texto);
+    setTipoPergunta(pergunta.tipo_resposta);
+    setOpcoes((pergunta as any).opcoes || []);
+    setEditandoPerguntaId(pergunta.id);
+  };
+
+  const cancelarEdicao = () => {
+    setPerguntaTexto("");
+    setOpcoes([]);
+    setEditandoPerguntaId(null);
+    setTipoPergunta("numero");
+  };
+
+  const deletarPergunta = async (id: string) => {
+    if (!confirm("Tem certeza que deseja deletar esta pergunta?")) {
+      return;
+    }
+
+    try {
+      const { error } = await supabase
         .from('perguntas')
-        .insert({
-          pesquisa_id: pesquisaSelecionada,
-          texto: perguntaTexto,
-          tipo_resposta: tipoPergunta,
-          ordem: perguntas.length + 1,
-          opcoes: (tipoPergunta === 'radio' || tipoPergunta === 'checkbox') ? opcoes : []
-        })
-        .select()
-        .single();
+        .delete()
+        .eq('id', id);
 
       if (error) throw error;
 
-      setPerguntas([...perguntas, data]);
-      setPerguntaTexto("");
-      setOpcoes([]);
+      setPerguntas(perguntas.filter(p => p.id !== id));
       
       toast({
         title: "Sucesso",
-        description: "Pergunta adicionada com sucesso!",
+        description: "Pergunta deletada com sucesso!",
       });
     } catch (error) {
-      console.error('Erro ao adicionar pergunta:', error);
+      console.error('Erro ao deletar pergunta:', error);
       toast({
         title: "Erro",
-        description: "Erro ao adicionar pergunta",
+        description: "Erro ao deletar pergunta",
         variant: "destructive",
       });
     }
@@ -358,7 +426,16 @@ const PesquisaPage = () => {
               </div>
             )}
 
-            <Button className="bg-[#5a89a3] text-white" onClick={adicionarPergunta}>Adicionar Pergunta</Button>
+            <div className="flex gap-2">
+              <Button className="bg-[#5a89a3] text-white" onClick={adicionarPergunta}>
+                {editandoPerguntaId ? "Atualizar Pergunta" : "Adicionar Pergunta"}
+              </Button>
+              {editandoPerguntaId && (
+                <Button variant="outline" onClick={cancelarEdicao}>
+                  Cancelar
+                </Button>
+              )}
+            </div>
           </CardContent>
         </Card>
 
@@ -375,10 +452,28 @@ const PesquisaPage = () => {
           <CardContent className="space-y-4 pt-6">
             <h2 className="text-xl font-semibold">Perguntas da Pesquisa</h2>
             {perguntas.map((pergunta) => (
-              <div key={pergunta.id} className="p-4 border rounded-lg">
-                <p><strong>Pergunta:</strong> {pergunta.texto}</p>
-                <p><strong>Tipo:</strong> {pergunta.tipo_resposta}</p>
-                <p><strong>Ordem:</strong> {pergunta.ordem}</p>
+              <div key={pergunta.id} className="p-4 border rounded-lg flex justify-between items-start">
+                <div className="flex-1">
+                  <p><strong>Pergunta:</strong> {pergunta.texto}</p>
+                  <p><strong>Tipo:</strong> {pergunta.tipo_resposta}</p>
+                  <p><strong>Ordem:</strong> {pergunta.ordem}</p>
+                </div>
+                <div className="flex gap-2">
+                  <Button 
+                    variant="outline" 
+                    size="sm"
+                    onClick={() => prepararEdicao(pergunta)}
+                  >
+                    Editar
+                  </Button>
+                  <Button 
+                    variant="destructive" 
+                    size="sm"
+                    onClick={() => deletarPergunta(pergunta.id)}
+                  >
+                    Deletar
+                  </Button>
+                </div>
               </div>
             ))}
           </CardContent>
