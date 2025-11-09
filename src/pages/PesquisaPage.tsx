@@ -284,6 +284,7 @@ const PesquisaPage = () => {
               <SelectContent>
                 <SelectItem value="numero">Número (0-10)</SelectItem>
                 <SelectItem value="campo">Texto</SelectItem>
+                <SelectItem value="texto_numerico">Texto Numérico</SelectItem>
                 <SelectItem value="data">Data</SelectItem>
               </SelectContent>
             </Select>

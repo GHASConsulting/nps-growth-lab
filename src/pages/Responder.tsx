@@ -18,7 +18,7 @@ interface Pergunta {
   id: string;
   pesquisa_id: string;
   texto: string;
-  tipo_resposta: 'numero' | 'campo' | 'data';
+  tipo_resposta: 'numero' | 'campo' | 'data' | 'texto_numerico';
   ordem: number;
 }
 
@@ -137,6 +137,9 @@ export default function Responder() {
           case 'campo':
             resposta.valor_texto = valor || null;
             break;
+          case 'texto_numerico':
+            resposta.valor_texto = valor || null;
+            break;
           case 'data':
             resposta.valor_data = valor || null;
             break;
@@ -207,6 +210,21 @@ export default function Responder() {
             value={valor}
             onChange={(e) => atualizarResposta(pergunta.id, e.target.value)}
             className="min-h-[100px]"
+          />
+        );
+      
+      case 'texto_numerico':
+        return (
+          <Input
+            type="text"
+            inputMode="numeric"
+            pattern="[0-9]*"
+            placeholder="Digite apenas números"
+            value={valor}
+            onChange={(e) => {
+              const numericValue = e.target.value.replace(/[^0-9]/g, '');
+              atualizarResposta(pergunta.id, numericValue);
+            }}
           />
         );
       
