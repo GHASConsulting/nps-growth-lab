@@ -44,6 +44,8 @@ const PesquisaPage = () => {
   const [pesquisaSelecionada, setPesquisaSelecionada] = useState<string>("");
   const [categorias, setCategorias] = useState<Categoria[]>([]);
   const [editandoPerguntaId, setEditandoPerguntaId] = useState<string | null>(null);
+  const [filtroNome, setFiltroNome] = useState("");
+  const [mostrarCriarPesquisa, setMostrarCriarPesquisa] = useState(false);
   const { toast } = useToast();
 
   useEffect(() => {
@@ -291,6 +293,43 @@ const PesquisaPage = () => {
     }
   };
 
+  const deletarPesquisa = async (id: string) => {
+    if (!confirm("Tem certeza que deseja deletar esta pesquisa e todas as suas perguntas?")) {
+      return;
+    }
+
+    try {
+      const { error } = await supabase
+        .from('pesquisas')
+        .delete()
+        .eq('id', id);
+
+      if (error) throw error;
+
+      setPesquisas(pesquisas.filter(p => p.id !== id));
+      if (pesquisaSelecionada === id) {
+        setPesquisaSelecionada("");
+        setPerguntas([]);
+      }
+      
+      toast({
+        title: "Sucesso",
+        description: "Pesquisa deletada com sucesso!",
+      });
+    } catch (error) {
+      console.error('Erro ao deletar pesquisa:', error);
+      toast({
+        title: "Erro",
+        description: "Erro ao deletar pesquisa",
+        variant: "destructive",
+      });
+    }
+  };
+
+  const pesquisasFiltradas = pesquisas.filter(p => 
+    p.nome.toLowerCase().includes(filtroNome.toLowerCase())
+  );
+
   const copiarLinkResposta = () => {
     if (!pesquisaSelecionada) {
       toast({
@@ -328,34 +367,103 @@ const PesquisaPage = () => {
 
         <Card>
           <CardContent className="space-y-4 pt-6">
-            <h2 className="text-xl font-semibold">Criar Nova Pesquisa</h2>
-            <Input placeholder="Nome da Pesquisa" value={nome} onChange={(e) => setNome(e.target.value)} />
-            <Textarea placeholder="Pergunta de Follow-up" value={followUp} onChange={(e) => setFollowUp(e.target.value)} />
-            <Textarea placeholder="Mensagem de Agradecimento" value={agradecimento} onChange={(e) => setAgradecimento(e.target.value)} />
-            <Select value={categoria} onValueChange={setCategoria}>
-              <SelectTrigger>
-                <SelectValue placeholder="Selecione uma categoria" />
-              </SelectTrigger>
-              <SelectContent>
-                {categorias.map((cat) => (
-                  <SelectItem key={cat.id} value={cat.nome}>
-                    {cat.nome} {cat.is_nps && '(NPS)'}
-                  </SelectItem>
-                ))}
-              </SelectContent>
-            </Select>
-            <Select value={periodicidade} onValueChange={setPeriodicidade}>
-              <SelectTrigger>
-                <SelectValue placeholder="Periodicidade" />
-              </SelectTrigger>
-              <SelectContent>
-                <SelectItem value="mensal">Mensal</SelectItem>
-                <SelectItem value="trimestral">Trimestral</SelectItem>
-                <SelectItem value="semestral">Semestral</SelectItem>
-                <SelectItem value="anual">Anual</SelectItem>
-              </SelectContent>
-            </Select>
-            <Button className="bg-[#5a89a3] text-white" onClick={criarPesquisa}>Criar Pesquisa</Button>
+            <div className="flex justify-between items-center">
+              <h2 className="text-xl font-semibold">Pesquisas Cadastradas</h2>
+              <Button 
+                className="bg-[#5a89a3] text-white" 
+                onClick={() => setMostrarCriarPesquisa(!mostrarCriarPesquisa)}
+              >
+                {mostrarCriarPesquisa ? "Ver Pesquisas" : "Criar Nova Pesquisa"}
+              </Button>
+            </div>
+
+            {!mostrarCriarPesquisa ? (
+              <div className="space-y-4">
+                <Input 
+                  placeholder="Filtrar por nome..." 
+                  value={filtroNome} 
+                  onChange={(e) => setFiltroNome(e.target.value)} 
+                />
+                
+                {pesquisasFiltradas.length === 0 ? (
+                  <p className="text-muted-foreground text-center py-4">
+                    Nenhuma pesquisa encontrada
+                  </p>
+                ) : (
+                  <div className="space-y-2">
+                    {pesquisasFiltradas.map((pesquisa) => (
+                      <div key={pesquisa.id} className="p-4 border rounded-lg flex justify-between items-center">
+                        <div className="flex-1">
+                          <p className="font-semibold">{pesquisa.nome}</p>
+                          {pesquisa.descricao && (
+                            <p className="text-sm text-muted-foreground">{pesquisa.descricao}</p>
+                          )}
+                          <p className="text-xs text-muted-foreground mt-1">
+                            Status: {pesquisa.ativa ? "Ativa" : "Inativa"}
+                          </p>
+                        </div>
+                        <div className="flex gap-2">
+                          <Button 
+                            variant="outline" 
+                            size="sm"
+                            onClick={() => {
+                              setPesquisaSelecionada(pesquisa.id);
+                              toast({
+                                title: "Pesquisa selecionada",
+                                description: "Agora você pode adicionar perguntas a esta pesquisa",
+                              });
+                            }}
+                          >
+                            Selecionar
+                          </Button>
+                          <Button 
+                            variant="destructive" 
+                            size="sm"
+                            onClick={() => deletarPesquisa(pesquisa.id)}
+                          >
+                            Excluir
+                          </Button>
+                        </div>
+                      </div>
+                    ))}
+                  </div>
+                )}
+              </div>
+            ) : (
+              <div className="space-y-4">
+                <h3 className="text-lg font-semibold">Criar Nova Pesquisa</h3>
+                <Input placeholder="Nome da Pesquisa" value={nome} onChange={(e) => setNome(e.target.value)} />
+                <Textarea placeholder="Pergunta de Follow-up" value={followUp} onChange={(e) => setFollowUp(e.target.value)} />
+                <Textarea placeholder="Mensagem de Agradecimento" value={agradecimento} onChange={(e) => setAgradecimento(e.target.value)} />
+                <Select value={categoria} onValueChange={setCategoria}>
+                  <SelectTrigger>
+                    <SelectValue placeholder="Selecione uma categoria" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    {categorias.map((cat) => (
+                      <SelectItem key={cat.id} value={cat.nome}>
+                        {cat.nome} {cat.is_nps && '(NPS)'}
+                      </SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
+                <Select value={periodicidade} onValueChange={setPeriodicidade}>
+                  <SelectTrigger>
+                    <SelectValue placeholder="Periodicidade" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="mensal">Mensal</SelectItem>
+                    <SelectItem value="trimestral">Trimestral</SelectItem>
+                    <SelectItem value="semestral">Semestral</SelectItem>
+                    <SelectItem value="anual">Anual</SelectItem>
+                  </SelectContent>
+                </Select>
+                <Button className="bg-[#5a89a3] text-white" onClick={() => {
+                  criarPesquisa();
+                  setMostrarCriarPesquisa(false);
+                }}>Criar Pesquisa</Button>
+              </div>
+            )}
           </CardContent>
         </Card>
 
