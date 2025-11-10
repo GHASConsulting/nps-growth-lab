@@ -8,6 +8,7 @@ import { Select, SelectTrigger, SelectValue, SelectContent, SelectItem } from "@
 import { useToast } from "@/hooks/use-toast";
 import { supabase } from "@/integrations/supabase/client";
 import { Checkbox } from "@/components/ui/checkbox";
+import Header from "@/components/Header";
 
 interface Categoria {
   id: string;
@@ -133,19 +134,9 @@ const ConfigPage = () => {
   };
 
   return (
-    <div className="min-h-screen bg-white text-black p-6">
-      <div className="max-w-4xl mx-auto space-y-6">
-        <nav className="flex space-x-6 mb-8 border-b pb-4">
-          <Link to="/pesquisas" className="text-black hover:underline hover:text-gray-600">
-            Gestão de Pesquisa
-          </Link>
-          <Link to="/dashboard" className="text-black hover:underline hover:text-gray-600">
-            Dashboard
-          </Link>
-          <Link to="/integracoes" className="text-black hover:underline hover:text-gray-600">
-            Integração
-          </Link>
-        </nav>
+    <div className="min-h-screen bg-white text-black">
+      <Header />
+      <div className="max-w-4xl mx-auto space-y-6 p-6">
         <h1 className="text-3xl font-bold">Administração</h1>
 
         <Card>
@@ -242,7 +233,7 @@ const ConfigPage = () => {
                     </label>
                   </div>
                 </div>
-                <Button onClick={criarCategoria} className="bg-[#5a89a3] text-white">
+                <Button onClick={criarCategoria}>
                   Adicionar Categoria
                 </Button>
                 
@@ -293,7 +284,7 @@ const ConfigPage = () => {
               </div>
             </div>
 
-            <Button className="w-full bg-[#5a89a3] text-white" onClick={salvarConfiguracoes}>
+            <Button className="w-full" onClick={salvarConfiguracoes}>
               Salvar Configurações
             </Button>
           </CardContent>

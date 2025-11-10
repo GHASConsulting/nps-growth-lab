@@ -7,6 +7,7 @@ import { Textarea } from "@/components/ui/textarea";
 import { Select, SelectTrigger, SelectValue, SelectContent, SelectItem } from "@/components/ui/select";
 import { useToast } from "@/hooks/use-toast";
 import { supabase } from "@/integrations/supabase/client";
+import Header from "@/components/Header";
 
 interface Pesquisa {
   id: string;
@@ -350,19 +351,9 @@ const PesquisaPage = () => {
   };
 
   return (
-    <div className="min-h-screen bg-white text-black p-6">
-      <div className="max-w-4xl mx-auto space-y-6">
-        <nav className="flex space-x-6 mb-8 border-b pb-4">
-          <Link to="/dashboard" className="text-black hover:underline hover:text-gray-600">
-            Dashboard
-          </Link>
-          <Link to="/config" className="text-black hover:underline hover:text-gray-600">
-            Administração
-          </Link>
-          <Link to="/integracoes" className="text-black hover:underline hover:text-gray-600">
-            Integração
-          </Link>
-        </nav>
+    <div className="min-h-screen bg-white text-black">
+      <Header />
+      <div className="max-w-4xl mx-auto space-y-6 p-6">
         <h1 className="text-3xl font-bold">Gestão de Pesquisas</h1>
 
         <Card>
@@ -370,7 +361,6 @@ const PesquisaPage = () => {
             <div className="flex justify-between items-center">
               <h2 className="text-xl font-semibold">Pesquisas Cadastradas</h2>
               <Button 
-                className="bg-[#5a89a3] text-white" 
                 onClick={() => setMostrarCriarPesquisa(!mostrarCriarPesquisa)}
               >
                 {mostrarCriarPesquisa ? "Ver Pesquisas" : "Criar Nova Pesquisa"}
@@ -458,7 +448,7 @@ const PesquisaPage = () => {
                     <SelectItem value="anual">Anual</SelectItem>
                   </SelectContent>
                 </Select>
-                <Button className="bg-[#5a89a3] text-white" onClick={() => {
+                <Button onClick={() => {
                   criarPesquisa();
                   setMostrarCriarPesquisa(false);
                 }}>Criar Pesquisa</Button>
@@ -535,7 +525,7 @@ const PesquisaPage = () => {
             )}
 
             <div className="flex gap-2">
-              <Button className="bg-[#5a89a3] text-white" onClick={adicionarPergunta}>
+              <Button onClick={adicionarPergunta}>
                 {editandoPerguntaId ? "Atualizar Pergunta" : "Adicionar Pergunta"}
               </Button>
               {editandoPerguntaId && (
@@ -550,7 +540,7 @@ const PesquisaPage = () => {
         <Card>
           <CardContent className="space-y-4 pt-6">
             <h2 className="text-xl font-semibold">Link de Resposta</h2>
-            <Button className="bg-[#5a89a3] text-white" onClick={copiarLinkResposta} disabled={!pesquisaSelecionada}>
+            <Button onClick={copiarLinkResposta} disabled={!pesquisaSelecionada}>
               Copiar Link de Resposta
             </Button>
           </CardContent>
