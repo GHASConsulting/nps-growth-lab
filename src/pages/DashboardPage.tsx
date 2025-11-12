@@ -181,6 +181,26 @@ const DashboardPage = () => {
     });
   };
 
+  // Verificar se a categoria selecionada é do tipo NPS
+  const categoriaAtual = categorias.find(cat => cat.nome === filtroCategoria);
+  const isCategoriaNPS = categoriaAtual?.is_nps || false;
+
+  // Determinar cor do NPS baseado no valor
+  const getCorNPS = (nps: number) => {
+    if (nps < 0) return "text-red-600";       // Zona crítica
+    if (nps <= 50) return "text-yellow-600";  // Zona de aperfeiçoamento
+    if (nps <= 75) return "text-blue-600";    // Zona de qualidade
+    return "text-green-600";                   // Zona de excelência
+  };
+
+  // Determinar zona do NPS
+  const getZonaNPS = (nps: number) => {
+    if (nps < 0) return "Zona Crítica";
+    if (nps <= 50) return "Zona de Aperfeiçoamento";
+    if (nps <= 75) return "Zona de Qualidade";
+    return "Zona de Excelência";
+  };
+
   const respostasFiltradas = respostas.filter(resposta => {
     const pesquisaDaResposta = pesquisas.find(p => p.id === resposta.pesquisa_id);
     
@@ -223,26 +243,6 @@ const DashboardPage = () => {
   });
 
   respostasAgrupadas.push(...Array.from(gruposMap.values()));
-
-  // Verificar se a categoria selecionada é do tipo NPS
-  const categoriaAtual = categorias.find(cat => cat.nome === filtroCategoria);
-  const isCategoriaNPS = categoriaAtual?.is_nps || false;
-
-  // Determinar cor do NPS baseado no valor
-  const getCorNPS = (nps: number) => {
-    if (nps < 0) return "text-red-600";       // Zona crítica
-    if (nps <= 49) return "text-yellow-600";  // Zona de aperfeiçoamento
-    if (nps <= 74) return "text-blue-600";    // Zona de qualidade
-    return "text-green-600";                   // Zona de excelência
-  };
-
-  // Determinar zona do NPS
-  const getZonaNPS = (nps: number) => {
-    if (nps < 0) return "Zona Crítica";
-    if (nps <= 49) return "Zona de Aperfeiçoamento";
-    if (nps <= 74) return "Zona de Qualidade";
-    return "Zona de Excelência";
-  };
 
   return (
     <div className="min-h-screen bg-white text-black">
