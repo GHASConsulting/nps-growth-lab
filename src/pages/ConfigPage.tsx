@@ -8,7 +8,6 @@ import { Select, SelectTrigger, SelectValue, SelectContent, SelectItem } from "@
 import { useToast } from "@/hooks/use-toast";
 import { supabase } from "@/integrations/supabase/client";
 import { Checkbox } from "@/components/ui/checkbox";
-import Header from "@/components/Header";
 
 interface Categoria {
   id: string;
@@ -135,7 +134,6 @@ const ConfigPage = () => {
 
   return (
     <div className="min-h-screen bg-white text-black">
-      <Header />
       <div className="max-w-4xl mx-auto space-y-6 p-6">
         <h1 className="text-3xl font-bold">Administração</h1>
 

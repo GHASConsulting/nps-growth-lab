@@ -9,7 +9,6 @@ import { Checkbox } from "@/components/ui/checkbox";
 import { Label } from "@/components/ui/label";
 import { useToast } from "@/hooks/use-toast";
 import { supabase } from "@/integrations/supabase/client";
-import Header from "@/components/Header";
 
 interface Pesquisa {
   id: string;
@@ -406,7 +405,6 @@ const PesquisaPage = () => {
 
   return (
     <div className="min-h-screen bg-white text-black">
-      <Header />
       <div className="max-w-4xl mx-auto space-y-6 p-6">
         <h1 className="text-3xl font-bold">Gestão de Pesquisas</h1>
 

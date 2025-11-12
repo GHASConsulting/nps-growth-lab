@@ -6,7 +6,6 @@ import { Select, SelectTrigger, SelectValue, SelectContent, SelectItem } from "@
 import { BarChart, Bar, XAxis, YAxis, Tooltip, ResponsiveContainer } from "recharts";
 import { format } from "date-fns";
 import { supabase } from "@/integrations/supabase/client";
-import Header from "@/components/Header";
 
 interface Resposta {
   id: string;
@@ -218,7 +217,6 @@ const DashboardPage = () => {
 
   return (
     <div className="min-h-screen bg-white text-black">
-      <Header />
       <div className="max-w-6xl mx-auto space-y-6 p-6">
         <h1 className="text-3xl font-bold">Dashboard</h1>
 

@@ -4,7 +4,6 @@ import { Card, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { useToast } from "@/hooks/use-toast";
-import Header from "@/components/Header";
 
 const IntegracoesPage = () => {
   const [apiKey, setApiKey] = useState("");
@@ -70,7 +69,6 @@ const IntegracoesPage = () => {
 
   return (
     <div className="min-h-screen bg-white text-black">
-      <Header />
       <div className="max-w-4xl mx-auto space-y-6 p-6">
         <h1 className="text-3xl font-bold">Integrações</h1>
 

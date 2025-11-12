@@ -2,12 +2,10 @@ import React from "react";
 import { Link } from "react-router-dom";
 import { Card, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
-import Header from "@/components/Header";
 
 const Index = () => {
   return (
     <div className="min-h-screen bg-white text-black">
-      <Header />
       <div className="max-w-4xl mx-auto space-y-6 p-6">
         <h1 className="text-3xl font-bold">Pesquisa GHAS - Dashboard Principal</h1>
         
@@ -16,7 +14,7 @@ const Index = () => {
             <CardContent className="p-6">
               <h2 className="text-xl font-semibold mb-4">Gestão de Pesquisas</h2>
               <p className="text-gray-600 mb-4">Crie e gerencie suas pesquisas NPS</p>
-              <Link to="/pesquisas">
+              <Link to="/pesquisa">
                 <Button className="w-full">
                   Acessar Pesquisas
                 </Button>

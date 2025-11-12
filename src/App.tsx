@@ -5,6 +5,7 @@ import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { BrowserRouter, Routes, Route } from "react-router-dom";
 import { AuthProvider } from "./contexts/AuthContext";
 import ProtectedRoute from "./components/ProtectedRoute";
+import Layout from "./components/Layout";
 import Index from "./pages/Index";
 import Auth from "./pages/Auth";
 import Responder from "./pages/Responder";
@@ -28,27 +29,37 @@ const App = () => (
             <Route path="/responder/:pesquisaId" element={<Responder />} />
             <Route path="/" element={
               <ProtectedRoute>
-                <Index />
+                <Layout>
+                  <Index />
+                </Layout>
               </ProtectedRoute>
             } />
-            <Route path="/pesquisas" element={
+            <Route path="/pesquisa" element={
               <ProtectedRoute>
-                <PesquisaPage />
+                <Layout>
+                  <PesquisaPage />
+                </Layout>
               </ProtectedRoute>
             } />
             <Route path="/dashboard" element={
               <ProtectedRoute>
-                <DashboardPage />
+                <Layout>
+                  <DashboardPage />
+                </Layout>
               </ProtectedRoute>
             } />
             <Route path="/config" element={
               <ProtectedRoute>
-                <ConfigPage />
+                <Layout>
+                  <ConfigPage />
+                </Layout>
               </ProtectedRoute>
             } />
             <Route path="/integracoes" element={
               <ProtectedRoute>
-                <IntegracoesPage />
+                <Layout>
+                  <IntegracoesPage />
+                </Layout>
               </ProtectedRoute>
             } />
             {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
