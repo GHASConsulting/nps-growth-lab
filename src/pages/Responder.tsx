@@ -24,6 +24,7 @@ interface Pergunta {
   tipo_resposta: 'numero' | 'campo' | 'data' | 'texto_numerico' | 'radio' | 'checkbox';
   ordem: number;
   opcoes?: string[];
+  obrigatoria: boolean;
 }
 
 export default function Responder() {
@@ -100,10 +101,16 @@ export default function Responder() {
   const validarRespostas = () => {
     for (const pergunta of perguntas) {
       const resposta = respostas[pergunta.id];
-      if (!resposta && pergunta.tipo_resposta !== 'campo') {
-        return false;
+      
+      // Se a pergunta é obrigatória, verificar se há resposta
+      if (pergunta.obrigatoria) {
+        if (!resposta || (Array.isArray(resposta) && resposta.length === 0)) {
+          return false;
+        }
       }
-      if (pergunta.tipo_resposta === 'numero') {
+      
+      // Validação específica para tipo número
+      if (pergunta.tipo_resposta === 'numero' && resposta) {
         const numero = parseInt(resposta);
         if (isNaN(numero) || numero < 0 || numero > 10) {
           return false;
@@ -339,6 +346,7 @@ export default function Responder() {
             <div key={pergunta.id}>
               <h3 className="text-lg font-medium mb-4">
                 {index + 1}. {pergunta.texto}
+                {pergunta.obrigatoria && <span className="text-destructive ml-1">*</span>}
               </h3>
               {renderizarCampoPergunta(pergunta)}
             </div>

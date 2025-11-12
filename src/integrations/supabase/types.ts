@@ -45,6 +45,7 @@ export type Database = {
         Row: {
           created_at: string
           id: string
+          obrigatoria: boolean
           opcoes: Json | null
           ordem: number
           pesquisa_id: string
@@ -54,6 +55,7 @@ export type Database = {
         Insert: {
           created_at?: string
           id?: string
+          obrigatoria?: boolean
           opcoes?: Json | null
           ordem: number
           pesquisa_id: string
@@ -63,6 +65,7 @@ export type Database = {
         Update: {
           created_at?: string
           id?: string
+          obrigatoria?: boolean
           opcoes?: Json | null
           ordem?: number
           pesquisa_id?: string

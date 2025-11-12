@@ -1,0 +1,3 @@
+-- Adiciona coluna para marcar perguntas como obrigatórias
+ALTER TABLE perguntas 
+ADD COLUMN obrigatoria BOOLEAN NOT NULL DEFAULT false;

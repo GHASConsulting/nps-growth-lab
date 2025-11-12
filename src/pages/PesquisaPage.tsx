@@ -5,6 +5,8 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
 import { Select, SelectTrigger, SelectValue, SelectContent, SelectItem } from "@/components/ui/select";
+import { Checkbox } from "@/components/ui/checkbox";
+import { Label } from "@/components/ui/label";
 import { useToast } from "@/hooks/use-toast";
 import { supabase } from "@/integrations/supabase/client";
 import Header from "@/components/Header";
@@ -22,6 +24,7 @@ interface Pergunta {
   texto: string;
   tipo_resposta: string;
   ordem: number;
+  obrigatoria: boolean;
 }
 
 interface Categoria {
@@ -40,6 +43,7 @@ const PesquisaPage = () => {
   const [tipoPergunta, setTipoPergunta] = useState("numero");
   const [opcoes, setOpcoes] = useState<string[]>([]);
   const [novaOpcao, setNovaOpcao] = useState("");
+  const [perguntaObrigatoria, setPerguntaObrigatoria] = useState(false);
   const [pesquisas, setPesquisas] = useState<Pesquisa[]>([]);
   const [perguntas, setPerguntas] = useState<Pergunta[]>([]);
   const [pesquisaSelecionada, setPesquisaSelecionada] = useState<string>("");
@@ -202,7 +206,8 @@ const PesquisaPage = () => {
           .update({
             texto: perguntaTexto,
             tipo_resposta: tipoPergunta,
-            opcoes: (tipoPergunta === 'radio' || tipoPergunta === 'checkbox') ? opcoes : []
+            opcoes: (tipoPergunta === 'radio' || tipoPergunta === 'checkbox') ? opcoes : [],
+            obrigatoria: perguntaObrigatoria
           })
           .eq('id', editandoPerguntaId)
           .select()
@@ -224,7 +229,8 @@ const PesquisaPage = () => {
             texto: perguntaTexto,
             tipo_resposta: tipoPergunta,
             ordem: perguntas.length + 1,
-            opcoes: (tipoPergunta === 'radio' || tipoPergunta === 'checkbox') ? opcoes : []
+            opcoes: (tipoPergunta === 'radio' || tipoPergunta === 'checkbox') ? opcoes : [],
+            obrigatoria: perguntaObrigatoria
           })
           .select()
           .single();
@@ -241,6 +247,7 @@ const PesquisaPage = () => {
       setPerguntaTexto("");
       setOpcoes([]);
       setEditandoPerguntaId(null);
+      setPerguntaObrigatoria(false);
     } catch (error) {
       console.error('Erro ao salvar pergunta:', error);
       toast({
@@ -255,6 +262,7 @@ const PesquisaPage = () => {
     setPerguntaTexto(pergunta.texto);
     setTipoPergunta(pergunta.tipo_resposta);
     setOpcoes((pergunta as any).opcoes || []);
+    setPerguntaObrigatoria(pergunta.obrigatoria);
     setEditandoPerguntaId(pergunta.id);
   };
 
@@ -263,6 +271,7 @@ const PesquisaPage = () => {
     setOpcoes([]);
     setEditandoPerguntaId(null);
     setTipoPergunta("numero");
+    setPerguntaObrigatoria(false);
   };
 
   const deletarPergunta = async (id: string) => {
@@ -489,6 +498,17 @@ const PesquisaPage = () => {
                 <SelectItem value="checkbox">Seleção Múltipla (Checkbox)</SelectItem>
               </SelectContent>
             </Select>
+
+            <div className="flex items-center space-x-2">
+              <Checkbox 
+                id="obrigatoria" 
+                checked={perguntaObrigatoria}
+                onCheckedChange={(checked) => setPerguntaObrigatoria(checked as boolean)}
+              />
+              <Label htmlFor="obrigatoria" className="cursor-pointer">
+                Pergunta obrigatória
+              </Label>
+            </div>
 
             {(tipoPergunta === 'radio' || tipoPergunta === 'checkbox') && (
               <div className="space-y-2 p-4 border rounded-lg">
