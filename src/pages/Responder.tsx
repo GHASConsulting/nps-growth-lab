@@ -15,6 +15,7 @@ interface Pesquisa {
   nome: string;
   descricao?: string;
   ativa: boolean;
+  categoria?: string;
 }
 
 interface Pergunta {
@@ -47,7 +48,7 @@ export default function Responder() {
       // Buscar pesquisa
       const { data: pesquisaData, error: pesquisaError } = await supabase
         .from('pesquisas')
-        .select('id, nome, descricao, ativa')
+        .select('id, nome, descricao, ativa, categoria')
         .eq('id', pesquisaId)
         .eq('ativa', true)
         .single();
@@ -194,24 +195,57 @@ export default function Responder() {
     }
   };
 
+  const getNpsColor = (index: number) => {
+    const colors = [
+      'hsl(0, 70%, 45%)',    // 0 - Vermelho escuro
+      'hsl(10, 75%, 50%)',   // 1 - Vermelho
+      'hsl(20, 80%, 55%)',   // 2 - Laranja avermelhado
+      'hsl(30, 85%, 55%)',   // 3 - Laranja
+      'hsl(40, 90%, 55%)',   // 4 - Laranja amarelado
+      'hsl(48, 95%, 55%)',   // 5 - Amarelo
+      'hsl(54, 95%, 60%)',   // 6 - Amarelo claro
+      'hsl(65, 70%, 65%)',   // 7 - Amarelo esverdeado claro
+      'hsl(75, 60%, 60%)',   // 8 - Verde amarelado
+      'hsl(85, 55%, 55%)',   // 9 - Verde claro
+      'hsl(95, 50%, 50%)',   // 10 - Verde
+    ];
+    return colors[index];
+  };
+
   const renderizarCampoPergunta = (pergunta: Pergunta) => {
     const valor = respostas[pergunta.id] || '';
+    const isNPS = pesquisa?.categoria?.toLowerCase().includes('nps');
 
     switch (pergunta.tipo_resposta) {
       case 'numero':
         return (
           <div>
             <div className="flex justify-center space-x-2 mb-6">
-              {Array.from({ length: 11 }, (_, i) => (
-                <Button
-                  key={i}
-                  variant={parseInt(valor) === i ? "default" : "outline"}
-                  className="w-12 h-12"
-                  onClick={() => atualizarResposta(pergunta.id, i.toString())}
-                >
-                  {i}
-                </Button>
-              ))}
+              {Array.from({ length: 11 }, (_, i) => {
+                const isSelected = parseInt(valor) === i;
+                const npsColor = isNPS ? getNpsColor(i) : undefined;
+                
+                return (
+                  <Button
+                    key={i}
+                    variant={isSelected ? "default" : "outline"}
+                    className="w-12 h-12 font-bold text-white border-2"
+                    style={isNPS && !isSelected ? {
+                      backgroundColor: npsColor,
+                      borderColor: npsColor,
+                      color: 'white'
+                    } : isNPS && isSelected ? {
+                      backgroundColor: npsColor,
+                      borderColor: 'hsl(var(--foreground))',
+                      color: 'white',
+                      boxShadow: '0 0 0 2px hsl(var(--background)), 0 0 0 4px hsl(var(--foreground))'
+                    } : undefined}
+                    onClick={() => atualizarResposta(pergunta.id, i.toString())}
+                  >
+                    {i}
+                  </Button>
+                );
+              })}
             </div>
             <div className="flex justify-between text-sm text-muted-foreground mb-6">
               <span>Muito improvável</span>
