@@ -45,6 +45,7 @@ const PesquisaPage = () => {
   const [opcoes, setOpcoes] = useState<string[]>([]);
   const [novaOpcao, setNovaOpcao] = useState("");
   const [perguntaObrigatoria, setPerguntaObrigatoria] = useState(false);
+  const [ordemPergunta, setOrdemPergunta] = useState<string>("");
   const [pesquisas, setPesquisas] = useState<Pesquisa[]>([]);
   const [perguntas, setPerguntas] = useState<Pergunta[]>([]);
   const [pesquisaSelecionada, setPesquisaSelecionada] = useState<string>("");
@@ -225,6 +226,11 @@ const PesquisaPage = () => {
       return;
     }
 
+    // Determinar a ordem: usar o valor informado ou calcular automaticamente
+    const ordemFinal = ordemPergunta.trim() 
+      ? parseInt(ordemPergunta) 
+      : perguntas.length + 1;
+
     try {
       if (editandoPerguntaId) {
         // Atualizar pergunta existente
@@ -233,6 +239,7 @@ const PesquisaPage = () => {
           .update({
             texto: perguntaTexto,
             tipo_resposta: tipoPergunta,
+            ordem: ordemFinal,
             opcoes: (tipoPergunta === 'radio' || tipoPergunta === 'checkbox') ? opcoes : [],
             obrigatoria: perguntaObrigatoria
           })
@@ -242,7 +249,7 @@ const PesquisaPage = () => {
 
         if (error) throw error;
 
-        setPerguntas(perguntas.map(p => p.id === editandoPerguntaId ? data : p));
+        setPerguntas(perguntas.map(p => p.id === editandoPerguntaId ? data : p).sort((a, b) => a.ordem - b.ordem));
         toast({
           title: "Sucesso",
           description: "Pergunta atualizada com sucesso!",
@@ -255,7 +262,7 @@ const PesquisaPage = () => {
             pesquisa_id: pesquisaSelecionada,
             texto: perguntaTexto,
             tipo_resposta: tipoPergunta,
-            ordem: perguntas.length + 1,
+            ordem: ordemFinal,
             opcoes: (tipoPergunta === 'radio' || tipoPergunta === 'checkbox') ? opcoes : [],
             obrigatoria: perguntaObrigatoria
           })
@@ -264,7 +271,7 @@ const PesquisaPage = () => {
 
         if (error) throw error;
 
-        setPerguntas([...perguntas, data]);
+        setPerguntas([...perguntas, data].sort((a, b) => a.ordem - b.ordem));
         toast({
           title: "Sucesso",
           description: "Pergunta adicionada com sucesso!",
@@ -275,6 +282,7 @@ const PesquisaPage = () => {
       setOpcoes([]);
       setEditandoPerguntaId(null);
       setPerguntaObrigatoria(false);
+      setOrdemPergunta("");
     } catch (error) {
       console.error('Erro ao salvar pergunta:', error);
       toast({
@@ -290,6 +298,7 @@ const PesquisaPage = () => {
     setTipoPergunta(pergunta.tipo_resposta);
     setOpcoes((pergunta as any).opcoes || []);
     setPerguntaObrigatoria(pergunta.obrigatoria);
+    setOrdemPergunta(String(pergunta.ordem));
     setEditandoPerguntaId(pergunta.id);
   };
 
@@ -316,6 +325,7 @@ const PesquisaPage = () => {
     setEditandoPerguntaId(null);
     setTipoPergunta("numero");
     setPerguntaObrigatoria(false);
+    setOrdemPergunta("");
   };
 
   const deletarPergunta = async (id: string) => {
@@ -570,6 +580,26 @@ const PesquisaPage = () => {
                 <SelectItem value="checkbox">Seleção Múltipla (Checkbox)</SelectItem>
               </SelectContent>
             </Select>
+
+            <div>
+              <Label htmlFor="ordem" className="block text-sm font-medium mb-2">
+                Ordem de Apresentação
+              </Label>
+              <Input 
+                id="ordem"
+                type="number" 
+                min="1"
+                placeholder="Deixe em branco para ordem automática" 
+                value={ordemPergunta} 
+                onChange={(e) => setOrdemPergunta(e.target.value)}
+              />
+              <p className="text-xs text-muted-foreground mt-1">
+                {ordemPergunta.trim() 
+                  ? `Esta pergunta será a ${ordemPergunta}ª do formulário` 
+                  : `Se não informar, será a ${perguntas.length + 1}ª pergunta automaticamente`
+                }
+              </p>
+            </div>
 
             <div className="flex items-center space-x-2">
               <Checkbox 
