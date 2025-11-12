@@ -37,6 +37,8 @@ interface Pergunta {
   texto: string;
   ordem: number;
   tipo_resposta: string;
+  is_nome_responsavel?: boolean;
+  is_instituicao?: boolean;
 }
 
 interface RespostaAgrupada {
@@ -48,7 +50,8 @@ interface RespostaAgrupada {
 const DashboardPage = () => {
   const [filtroNome, setFiltroNome] = useState("");
   const [filtroEmpresa, setFiltroEmpresa] = useState("");
-  const [filtroData, setFiltroData] = useState("");
+  const [filtroDataInicio, setFiltroDataInicio] = useState("");
+  const [filtroDataFim, setFiltroDataFim] = useState("");
   const [filtroCategoria, setFiltroCategoria] = useState("");
   const [respostas, setRespostas] = useState<Resposta[]>([]);
   const [pesquisas, setPesquisas] = useState<Pesquisa[]>([]);
@@ -86,7 +89,7 @@ const DashboardPage = () => {
 
   useEffect(() => {
     gerarDadosGrafico();
-  }, [respostas, filtroNome, filtroEmpresa, filtroData, filtroCategoria]);
+  }, [respostas, filtroNome, filtroEmpresa, filtroDataInicio, filtroDataFim, filtroCategoria]);
 
   const buscarRespostas = async () => {
     try {
@@ -133,11 +136,24 @@ const DashboardPage = () => {
   const gerarDadosGrafico = () => {
     const respostasFiltradas = respostas.filter(resposta => {
       const pesquisaDaResposta = pesquisas.find(p => p.id === resposta.pesquisa_id);
-      const matchNome = !filtroNome || (resposta.canal && resposta.canal.toLowerCase().includes(filtroNome.toLowerCase()));
-      const matchEmpresa = !filtroEmpresa || (resposta.canal && resposta.canal.toLowerCase().includes(filtroEmpresa.toLowerCase()));
-      const matchData = !filtroData || resposta.respondido_em.includes(filtroData);
+      
+      // Buscar pergunta marcada como Nome Responsável
+      const perguntaNome = perguntas.find(p => p.is_nome_responsavel && p.pesquisa_id === resposta.pesquisa_id);
+      const respostaNome = perguntaNome ? respostas.find(r => r.pergunta_id === perguntaNome.id && r.respondido_em === resposta.respondido_em) : null;
+      const matchNome = !filtroNome || (respostaNome?.valor_texto && respostaNome.valor_texto.toLowerCase().includes(filtroNome.toLowerCase()));
+      
+      // Buscar pergunta marcada como Instituição
+      const perguntaInstituicao = perguntas.find(p => p.is_instituicao && p.pesquisa_id === resposta.pesquisa_id);
+      const respostaInstituicao = perguntaInstituicao ? respostas.find(r => r.pergunta_id === perguntaInstituicao.id && r.respondido_em === resposta.respondido_em) : null;
+      const matchEmpresa = !filtroEmpresa || (respostaInstituicao?.valor_texto && respostaInstituicao.valor_texto.toLowerCase().includes(filtroEmpresa.toLowerCase()));
+      
+      // Filtro por range de datas
+      const dataResposta = new Date(resposta.respondido_em).toISOString().split('T')[0];
+      const matchDataInicio = !filtroDataInicio || dataResposta >= filtroDataInicio;
+      const matchDataFim = !filtroDataFim || dataResposta <= filtroDataFim;
+      
       const matchCategoria = !filtroCategoria || filtroCategoria === "todos" || (pesquisaDaResposta?.categoria && pesquisaDaResposta.categoria === filtroCategoria);
-      return matchNome && matchEmpresa && matchData && matchCategoria;
+      return matchNome && matchEmpresa && matchDataInicio && matchDataFim && matchCategoria;
     });
 
     const dadosNPS = Array.from({ length: 11 }, (_, i) => ({
@@ -167,11 +183,24 @@ const DashboardPage = () => {
 
   const respostasFiltradas = respostas.filter(resposta => {
     const pesquisaDaResposta = pesquisas.find(p => p.id === resposta.pesquisa_id);
-    const matchNome = !filtroNome || (resposta.canal && resposta.canal.toLowerCase().includes(filtroNome.toLowerCase()));
-    const matchEmpresa = !filtroEmpresa || (resposta.canal && resposta.canal.toLowerCase().includes(filtroEmpresa.toLowerCase()));
-    const matchData = !filtroData || resposta.respondido_em.includes(filtroData);
+    
+    // Buscar pergunta marcada como Nome Responsável
+    const perguntaNome = perguntas.find(p => p.is_nome_responsavel && p.pesquisa_id === resposta.pesquisa_id);
+    const respostaNome = perguntaNome ? respostas.find(r => r.pergunta_id === perguntaNome.id && r.respondido_em === resposta.respondido_em) : null;
+    const matchNome = !filtroNome || (respostaNome?.valor_texto && respostaNome.valor_texto.toLowerCase().includes(filtroNome.toLowerCase()));
+    
+    // Buscar pergunta marcada como Instituição
+    const perguntaInstituicao = perguntas.find(p => p.is_instituicao && p.pesquisa_id === resposta.pesquisa_id);
+    const respostaInstituicao = perguntaInstituicao ? respostas.find(r => r.pergunta_id === perguntaInstituicao.id && r.respondido_em === resposta.respondido_em) : null;
+    const matchEmpresa = !filtroEmpresa || (respostaInstituicao?.valor_texto && respostaInstituicao.valor_texto.toLowerCase().includes(filtroEmpresa.toLowerCase()));
+    
+    // Filtro por range de datas
+    const dataResposta = new Date(resposta.respondido_em).toISOString().split('T')[0];
+    const matchDataInicio = !filtroDataInicio || dataResposta >= filtroDataInicio;
+    const matchDataFim = !filtroDataFim || dataResposta <= filtroDataFim;
+    
     const matchCategoria = !filtroCategoria || filtroCategoria === "todos" || (pesquisaDaResposta?.categoria && pesquisaDaResposta.categoria === filtroCategoria);
-    return matchNome && matchEmpresa && matchData && matchCategoria;
+    return matchNome && matchEmpresa && matchDataInicio && matchDataFim && matchCategoria;
   });
 
   // Agrupar respostas por sessão (pesquisa_id + respondido_em)
@@ -223,7 +252,7 @@ const DashboardPage = () => {
         <Card>
           <CardContent className="space-y-4 pt-6">
             <h2 className="text-xl font-semibold">Filtros</h2>
-            <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
+            <div className="grid grid-cols-1 md:grid-cols-5 gap-4">
               <Input 
                 placeholder="Filtrar por Nome" 
                 value={filtroNome} 
@@ -234,12 +263,24 @@ const DashboardPage = () => {
                 value={filtroEmpresa} 
                 onChange={(e) => setFiltroEmpresa(e.target.value)} 
               />
-              <Input 
-                type="date" 
-                placeholder="Filtrar por Data" 
-                value={filtroData} 
-                onChange={(e) => setFiltroData(e.target.value)} 
-              />
+              <div className="space-y-1">
+                <Input 
+                  type="date" 
+                  placeholder="Data Início" 
+                  value={filtroDataInicio} 
+                  onChange={(e) => setFiltroDataInicio(e.target.value)} 
+                />
+                <p className="text-xs text-muted-foreground">Data Início</p>
+              </div>
+              <div className="space-y-1">
+                <Input 
+                  type="date" 
+                  placeholder="Data Fim" 
+                  value={filtroDataFim} 
+                  onChange={(e) => setFiltroDataFim(e.target.value)} 
+                />
+                <p className="text-xs text-muted-foreground">Data Fim</p>
+              </div>
               <Select value={filtroCategoria} onValueChange={setFiltroCategoria}>
                 <SelectTrigger>
                   <SelectValue placeholder="Filtrar por Categoria" />

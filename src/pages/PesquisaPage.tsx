@@ -46,6 +46,8 @@ const PesquisaPage = () => {
   const [novaOpcao, setNovaOpcao] = useState("");
   const [perguntaObrigatoria, setPerguntaObrigatoria] = useState(false);
   const [ordemPergunta, setOrdemPergunta] = useState<string>("");
+  const [isNomeResponsavel, setIsNomeResponsavel] = useState(false);
+  const [isInstituicao, setIsInstituicao] = useState(false);
   const [pesquisas, setPesquisas] = useState<Pesquisa[]>([]);
   const [perguntas, setPerguntas] = useState<Pergunta[]>([]);
   const [pesquisaSelecionada, setPesquisaSelecionada] = useState<string>("");
@@ -241,7 +243,9 @@ const PesquisaPage = () => {
             tipo_resposta: tipoPergunta,
             ordem: ordemFinal,
             opcoes: (tipoPergunta === 'radio' || tipoPergunta === 'checkbox') ? opcoes : [],
-            obrigatoria: perguntaObrigatoria
+            obrigatoria: perguntaObrigatoria,
+            is_nome_responsavel: isNomeResponsavel,
+            is_instituicao: isInstituicao
           })
           .eq('id', editandoPerguntaId)
           .select()
@@ -264,7 +268,9 @@ const PesquisaPage = () => {
             tipo_resposta: tipoPergunta,
             ordem: ordemFinal,
             opcoes: (tipoPergunta === 'radio' || tipoPergunta === 'checkbox') ? opcoes : [],
-            obrigatoria: perguntaObrigatoria
+            obrigatoria: perguntaObrigatoria,
+            is_nome_responsavel: isNomeResponsavel,
+            is_instituicao: isInstituicao
           })
           .select()
           .single();
@@ -283,6 +289,8 @@ const PesquisaPage = () => {
       setEditandoPerguntaId(null);
       setPerguntaObrigatoria(false);
       setOrdemPergunta("");
+      setIsNomeResponsavel(false);
+      setIsInstituicao(false);
     } catch (error) {
       console.error('Erro ao salvar pergunta:', error);
       toast({
@@ -299,6 +307,8 @@ const PesquisaPage = () => {
     setOpcoes((pergunta as any).opcoes || []);
     setPerguntaObrigatoria(pergunta.obrigatoria);
     setOrdemPergunta(String(pergunta.ordem));
+    setIsNomeResponsavel((pergunta as any).is_nome_responsavel || false);
+    setIsInstituicao((pergunta as any).is_instituicao || false);
     setEditandoPerguntaId(pergunta.id);
   };
 
@@ -326,6 +336,8 @@ const PesquisaPage = () => {
     setTipoPergunta("numero");
     setPerguntaObrigatoria(false);
     setOrdemPergunta("");
+    setIsNomeResponsavel(false);
+    setIsInstituicao(false);
   };
 
   const deletarPergunta = async (id: string) => {
@@ -609,6 +621,28 @@ const PesquisaPage = () => {
               />
               <Label htmlFor="obrigatoria" className="cursor-pointer">
                 Pergunta obrigatória
+              </Label>
+            </div>
+
+            <div className="flex items-center space-x-2">
+              <Checkbox 
+                id="nome-responsavel" 
+                checked={isNomeResponsavel} 
+                onCheckedChange={(checked) => setIsNomeResponsavel(checked === true)} 
+              />
+              <Label htmlFor="nome-responsavel" className="cursor-pointer">
+                Nome Responsável (usar no filtro do Dashboard)
+              </Label>
+            </div>
+
+            <div className="flex items-center space-x-2">
+              <Checkbox 
+                id="instituicao" 
+                checked={isInstituicao} 
+                onCheckedChange={(checked) => setIsInstituicao(checked === true)} 
+              />
+              <Label htmlFor="instituicao" className="cursor-pointer">
+                Instituição (usar no filtro do Dashboard)
               </Label>
             </div>
 

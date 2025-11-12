@@ -45,6 +45,8 @@ export type Database = {
         Row: {
           created_at: string
           id: string
+          is_instituicao: boolean
+          is_nome_responsavel: boolean
           obrigatoria: boolean
           opcoes: Json | null
           ordem: number
@@ -55,6 +57,8 @@ export type Database = {
         Insert: {
           created_at?: string
           id?: string
+          is_instituicao?: boolean
+          is_nome_responsavel?: boolean
           obrigatoria?: boolean
           opcoes?: Json | null
           ordem: number
@@ -65,6 +69,8 @@ export type Database = {
         Update: {
           created_at?: string
           id?: string
+          is_instituicao?: boolean
+          is_nome_responsavel?: boolean
           obrigatoria?: boolean
           opcoes?: Json | null
           ordem?: number
