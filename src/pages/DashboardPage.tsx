@@ -151,9 +151,18 @@ const DashboardPage = () => {
 
   // Determinar cor do NPS baseado no valor
   const getCorNPS = (nps: number) => {
-    if (nps < 0) return "text-red-600";
-    if (nps <= 50) return "text-yellow-600";
-    return "text-green-600";
+    if (nps < 0) return "text-red-600";       // Zona crítica
+    if (nps <= 49) return "text-yellow-600";  // Zona de aperfeiçoamento
+    if (nps <= 74) return "text-blue-600";    // Zona de qualidade
+    return "text-green-600";                   // Zona de excelência
+  };
+
+  // Determinar zona do NPS
+  const getZonaNPS = (nps: number) => {
+    if (nps < 0) return "Zona Crítica";
+    if (nps <= 49) return "Zona de Aperfeiçoamento";
+    if (nps <= 74) return "Zona de Qualidade";
+    return "Zona de Excelência";
   };
 
   return (
@@ -212,9 +221,15 @@ const DashboardPage = () => {
                   Net Promoter Score
                 </div>
                 <div className="text-sm text-gray-500 mt-1">
-                  {estatisticasNPS.nps < 0 && "Zona Crítica"}
-                  {estatisticasNPS.nps >= 0 && estatisticasNPS.nps <= 50 && "Zona de Aperfeiçoamento"}
-                  {estatisticasNPS.nps > 50 && "Zona de Excelência"}
+                  {getZonaNPS(estatisticasNPS.nps)}
+                </div>
+                <div className="text-xs text-gray-400 mt-4">
+                  <div className="space-y-1">
+                    <div>Zona de Excelência: 75 a 100</div>
+                    <div>Zona de Qualidade: 50 a 74</div>
+                    <div>Zona de Aperfeiçoamento: 0 a 49</div>
+                    <div>Zona Crítica: abaixo de 0</div>
+                  </div>
                 </div>
               </div>
             </CardContent>
