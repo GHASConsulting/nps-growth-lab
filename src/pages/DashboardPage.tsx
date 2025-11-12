@@ -223,14 +223,6 @@ const DashboardPage = () => {
                 <div className="text-sm text-gray-500 mt-1">
                   {getZonaNPS(estatisticasNPS.nps)}
                 </div>
-                <div className="text-xs text-gray-400 mt-4">
-                  <div className="space-y-1">
-                    <div>Zona de Excelência: 75 a 100</div>
-                    <div>Zona de Qualidade: 50 a 74</div>
-                    <div>Zona de Aperfeiçoamento: 0 a 49</div>
-                    <div>Zona Crítica: abaixo de 0</div>
-                  </div>
-                </div>
               </div>
             </CardContent>
           </Card>
