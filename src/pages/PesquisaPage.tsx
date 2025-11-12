@@ -16,6 +16,8 @@ interface Pesquisa {
   nome: string;
   descricao?: string;
   ativa: boolean;
+  categoria?: string;
+  periodicidade?: string;
 }
 
 interface Pergunta {
@@ -49,6 +51,7 @@ const PesquisaPage = () => {
   const [pesquisaSelecionada, setPesquisaSelecionada] = useState<string>("");
   const [categorias, setCategorias] = useState<Categoria[]>([]);
   const [editandoPerguntaId, setEditandoPerguntaId] = useState<string | null>(null);
+  const [editandoPesquisaId, setEditandoPesquisaId] = useState<string | null>(null);
   const [filtroNome, setFiltroNome] = useState("");
   const [mostrarCriarPesquisa, setMostrarCriarPesquisa] = useState(false);
   const { toast } = useToast();
@@ -117,7 +120,7 @@ const PesquisaPage = () => {
     }
   };
 
-  const criarPesquisa = async () => {
+  const criarOuAtualizarPesquisa = async () => {
     if (!nome) {
       toast({
         title: "Erro",
@@ -128,35 +131,60 @@ const PesquisaPage = () => {
     }
 
     try {
-      const { data, error } = await supabase
-        .from('pesquisas')
-        .insert({
-          nome,
-          categoria,
-          descricao: agradecimento,
-          periodicidade,
-          user_id: (await supabase.auth.getUser()).data.user?.id
-        })
-        .select()
-        .single();
+      if (editandoPesquisaId) {
+        // Atualizar pesquisa existente
+        const { data, error } = await supabase
+          .from('pesquisas')
+          .update({
+            nome,
+            categoria,
+            descricao: agradecimento,
+            periodicidade,
+          })
+          .eq('id', editandoPesquisaId)
+          .select()
+          .single();
 
-      if (error) throw error;
+        if (error) throw error;
 
-      setPesquisas([data, ...pesquisas]);
+        setPesquisas(pesquisas.map(p => p.id === editandoPesquisaId ? data : p));
+        toast({
+          title: "Sucesso",
+          description: "Pesquisa atualizada com sucesso!",
+        });
+      } else {
+        // Criar nova pesquisa
+        const { data, error } = await supabase
+          .from('pesquisas')
+          .insert({
+            nome,
+            categoria,
+            descricao: agradecimento,
+            periodicidade,
+            user_id: (await supabase.auth.getUser()).data.user?.id
+          })
+          .select()
+          .single();
+
+        if (error) throw error;
+
+        setPesquisas([data, ...pesquisas]);
+        toast({
+          title: "Sucesso",
+          description: "Pesquisa criada com sucesso!",
+        });
+      }
+
       setNome("");
       setCategoria("");
       setAgradecimento("");
       setPeriodicidade("");
-      
-      toast({
-        title: "Sucesso",
-        description: "Pesquisa criada com sucesso!",
-      });
+      setEditandoPesquisaId(null);
     } catch (error) {
-      console.error('Erro ao criar pesquisa:', error);
+      console.error('Erro ao salvar pesquisa:', error);
       toast({
         title: "Erro",
-        description: "Erro ao criar pesquisa",
+        description: "Erro ao salvar pesquisa",
         variant: "destructive",
       });
     }
@@ -258,12 +286,29 @@ const PesquisaPage = () => {
     }
   };
 
-  const prepararEdicao = (pergunta: Pergunta) => {
+  const prepararEdicaoPergunta = (pergunta: Pergunta) => {
     setPerguntaTexto(pergunta.texto);
     setTipoPergunta(pergunta.tipo_resposta);
     setOpcoes((pergunta as any).opcoes || []);
     setPerguntaObrigatoria(pergunta.obrigatoria);
     setEditandoPerguntaId(pergunta.id);
+  };
+
+  const prepararEdicaoPesquisa = (pesquisa: Pesquisa) => {
+    setNome(pesquisa.nome);
+    setCategoria(pesquisa.categoria || "");
+    setAgradecimento(pesquisa.descricao || "");
+    setPeriodicidade(pesquisa.periodicidade || "");
+    setEditandoPesquisaId(pesquisa.id);
+    setMostrarCriarPesquisa(true);
+  };
+
+  const cancelarEdicaoPesquisa = () => {
+    setNome("");
+    setCategoria("");
+    setAgradecimento("");
+    setPeriodicidade("");
+    setEditandoPesquisaId(null);
   };
 
   const cancelarEdicao = () => {
@@ -370,7 +415,12 @@ const PesquisaPage = () => {
             <div className="flex justify-between items-center">
               <h2 className="text-xl font-semibold">Pesquisas Cadastradas</h2>
               <Button 
-                onClick={() => setMostrarCriarPesquisa(!mostrarCriarPesquisa)}
+                onClick={() => {
+                  setMostrarCriarPesquisa(!mostrarCriarPesquisa);
+                  if (mostrarCriarPesquisa) {
+                    cancelarEdicaoPesquisa();
+                  }
+                }}
               >
                 {mostrarCriarPesquisa ? "Ver Pesquisas" : "Criar Nova Pesquisa"}
               </Button>
@@ -416,6 +466,13 @@ const PesquisaPage = () => {
                             Selecionar
                           </Button>
                           <Button 
+                            variant="secondary" 
+                            size="sm"
+                            onClick={() => prepararEdicaoPesquisa(pesquisa)}
+                          >
+                            Editar
+                          </Button>
+                          <Button 
                             variant="destructive" 
                             size="sm"
                             onClick={() => deletarPesquisa(pesquisa.id)}
@@ -430,7 +487,9 @@ const PesquisaPage = () => {
               </div>
             ) : (
               <div className="space-y-4">
-                <h3 className="text-lg font-semibold">Criar Nova Pesquisa</h3>
+                <h3 className="text-lg font-semibold">
+                  {editandoPesquisaId ? "Editar Pesquisa" : "Criar Nova Pesquisa"}
+                </h3>
                 <Input placeholder="Nome da Pesquisa" value={nome} onChange={(e) => setNome(e.target.value)} />
                 <Textarea placeholder="Pergunta de Follow-up" value={followUp} onChange={(e) => setFollowUp(e.target.value)} />
                 <Textarea placeholder="Mensagem de Agradecimento" value={agradecimento} onChange={(e) => setAgradecimento(e.target.value)} />
@@ -457,10 +516,25 @@ const PesquisaPage = () => {
                     <SelectItem value="anual">Anual</SelectItem>
                   </SelectContent>
                 </Select>
-                <Button onClick={() => {
-                  criarPesquisa();
-                  setMostrarCriarPesquisa(false);
-                }}>Criar Pesquisa</Button>
+                <div className="flex gap-2">
+                  <Button onClick={() => {
+                    criarOuAtualizarPesquisa();
+                    setMostrarCriarPesquisa(false);
+                  }}>
+                    {editandoPesquisaId ? "Atualizar Pesquisa" : "Criar Pesquisa"}
+                  </Button>
+                  {editandoPesquisaId && (
+                    <Button 
+                      variant="outline" 
+                      onClick={() => {
+                        cancelarEdicaoPesquisa();
+                        setMostrarCriarPesquisa(false);
+                      }}
+                    >
+                      Cancelar
+                    </Button>
+                  )}
+                </div>
               </div>
             )}
           </CardContent>
@@ -580,7 +654,7 @@ const PesquisaPage = () => {
                   <Button 
                     variant="outline" 
                     size="sm"
-                    onClick={() => prepararEdicao(pergunta)}
+                    onClick={() => prepararEdicaoPergunta(pergunta)}
                   >
                     Editar
                   </Button>
