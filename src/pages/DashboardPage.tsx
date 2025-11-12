@@ -32,6 +32,20 @@ interface Categoria {
   is_nps: boolean;
 }
 
+interface Pergunta {
+  id: string;
+  pesquisa_id: string;
+  texto: string;
+  ordem: number;
+  tipo_resposta: string;
+}
+
+interface RespostaAgrupada {
+  respondido_em: string;
+  pesquisa_id: string;
+  respostas: Map<string, Resposta>;
+}
+
 const DashboardPage = () => {
   const [filtroNome, setFiltroNome] = useState("");
   const [filtroEmpresa, setFiltroEmpresa] = useState("");
@@ -40,6 +54,7 @@ const DashboardPage = () => {
   const [respostas, setRespostas] = useState<Resposta[]>([]);
   const [pesquisas, setPesquisas] = useState<Pesquisa[]>([]);
   const [categorias, setCategorias] = useState<Categoria[]>([]);
+  const [perguntas, setPerguntas] = useState<Pergunta[]>([]);
   const [dadosGrafico, setDadosGrafico] = useState<any[]>([]);
   const [estatisticasNPS, setEstatisticasNPS] = useState({
     promotores: 0,
@@ -53,6 +68,7 @@ const DashboardPage = () => {
     buscarRespostas();
     buscarPesquisas();
     buscarCategorias();
+    buscarPerguntas();
   }, []);
 
   const buscarCategorias = async () => {
@@ -101,6 +117,20 @@ const DashboardPage = () => {
     }
   };
 
+  const buscarPerguntas = async () => {
+    try {
+      const { data, error } = await supabase
+        .from('perguntas')
+        .select('*')
+        .order('ordem');
+
+      if (error) throw error;
+      setPerguntas(data || []);
+    } catch (error) {
+      console.error('Erro ao buscar perguntas:', error);
+    }
+  };
+
   const gerarDadosGrafico = () => {
     const respostasFiltradas = respostas.filter(resposta => {
       const pesquisaDaResposta = pesquisas.find(p => p.id === resposta.pesquisa_id);
@@ -144,6 +174,27 @@ const DashboardPage = () => {
     const matchCategoria = !filtroCategoria || filtroCategoria === "todos" || (pesquisaDaResposta?.categoria && pesquisaDaResposta.categoria === filtroCategoria);
     return matchNome && matchEmpresa && matchData && matchCategoria;
   });
+
+  // Agrupar respostas por sessão (pesquisa_id + respondido_em)
+  const respostasAgrupadas: RespostaAgrupada[] = [];
+  const gruposMap = new Map<string, RespostaAgrupada>();
+
+  respostasFiltradas.forEach(resposta => {
+    const chaveGrupo = `${resposta.pesquisa_id}_${resposta.respondido_em}`;
+    
+    if (!gruposMap.has(chaveGrupo)) {
+      gruposMap.set(chaveGrupo, {
+        respondido_em: resposta.respondido_em,
+        pesquisa_id: resposta.pesquisa_id,
+        respostas: new Map()
+      });
+    }
+    
+    const grupo = gruposMap.get(chaveGrupo)!;
+    grupo.respostas.set(resposta.pergunta_id, resposta);
+  });
+
+  respostasAgrupadas.push(...Array.from(gruposMap.values()));
 
   // Verificar se a categoria selecionada é do tipo NPS
   const categoriaAtual = categorias.find(cat => cat.nome === filtroCategoria);
@@ -266,25 +317,48 @@ const DashboardPage = () => {
           <CardContent className="space-y-4 pt-6">
             <h2 className="text-xl font-semibold">Respostas Filtradas</h2>
             <div className="space-y-4">
-              {respostasFiltradas.map((resposta) => (
-                <div key={resposta.id} className="p-4 border rounded-lg">
-                  <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
-                    <div>
-                      <strong>Canal:</strong> {resposta.canal || 'N/A'}
-                    </div>
-                    <div>
-                      <strong>Nota:</strong> {resposta.valor_numero || 'N/A'}
-                    </div>
-                    <div>
-                      <strong>Data:</strong> {format(new Date(resposta.respondido_em), 'dd/MM/yyyy')}
-                    </div>
-                    <div>
-                      <strong>Comentário:</strong> {resposta.valor_texto || 'N/A'}
+              {respostasAgrupadas.map((grupo, index) => {
+                const perguntasDaPesquisa = perguntas
+                  .filter(p => p.pesquisa_id === grupo.pesquisa_id)
+                  .sort((a, b) => a.ordem - b.ordem);
+
+                return (
+                  <div key={`${grupo.pesquisa_id}_${grupo.respondido_em}_${index}`} className="p-4 border rounded-lg">
+                    <div className="space-y-2">
+                      <div className="flex gap-4 mb-3 pb-3 border-b">
+                        <div>
+                          <strong>Data do Registro:</strong> {format(new Date(grupo.respondido_em), 'dd/MM/yyyy HH:mm')}
+                        </div>
+                        {/* Mostrar Nota se existir uma pergunta NPS */}
+                        {Array.from(grupo.respostas.values()).find(r => r.valor_numero !== null && r.valor_numero !== undefined) && (
+                          <div>
+                            <strong>Nota:</strong> {Array.from(grupo.respostas.values()).find(r => r.valor_numero !== null && r.valor_numero !== undefined)?.valor_numero}
+                          </div>
+                        )}
+                      </div>
+                      
+                      {perguntasDaPesquisa.map((pergunta, idx) => {
+                        const resposta = grupo.respostas.get(pergunta.id);
+                        let valorResposta = 'N/A';
+                        
+                        if (resposta) {
+                          if (resposta.valor_texto) valorResposta = resposta.valor_texto;
+                          else if (resposta.valor_numero !== null && resposta.valor_numero !== undefined) valorResposta = String(resposta.valor_numero);
+                          else if (resposta.valor_data) valorResposta = format(new Date(resposta.valor_data), 'dd/MM/yyyy');
+                        }
+                        
+                        return (
+                          <div key={pergunta.id}>
+                            <strong>Pergunta {idx + 1}:</strong> {pergunta.texto}
+                            <div className="ml-4 text-gray-600">{valorResposta}</div>
+                          </div>
+                        );
+                      })}
                     </div>
                   </div>
-                </div>
-              ))}
-              {respostasFiltradas.length === 0 && (
+                );
+              })}
+              {respostasAgrupadas.length === 0 && (
                 <p className="text-gray-500 text-center py-8">Nenhuma resposta encontrada.</p>
               )}
             </div>
