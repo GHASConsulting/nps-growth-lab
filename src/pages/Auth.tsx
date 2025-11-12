@@ -6,6 +6,7 @@ import { Tabs, TabsList, TabsTrigger, TabsContent } from '@/components/ui/tabs';
 import { useAuth } from '@/contexts/AuthContext';
 import { useNavigate } from 'react-router-dom';
 import { toast } from '@/hooks/use-toast';
+import logoAva from '@/assets/logo-ava.png';
 
 export default function Auth() {
   const [email, setEmail] = useState('');
@@ -68,9 +69,10 @@ export default function Auth() {
   return (
     <div className="min-h-screen flex items-center justify-center bg-background p-4">
       <Card className="w-full max-w-md">
-        <CardHeader>
+        <CardHeader className="flex flex-col items-center">
+          <img src={logoAva} alt="AVA - Assistente Virtual de Atendimento" className="h-16 mb-4" />
           <CardTitle className="text-center text-2xl font-bold">
-            NPS GHAS
+            Pesquisa GHAS
           </CardTitle>
         </CardHeader>
         <CardContent>

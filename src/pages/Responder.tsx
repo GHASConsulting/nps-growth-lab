@@ -9,6 +9,7 @@ import { Checkbox } from '@/components/ui/checkbox';
 import { Label } from '@/components/ui/label';
 import { supabase } from '@/integrations/supabase/client';
 import { useToast } from '@/hooks/use-toast';
+import logoAva from '@/assets/logo-ava.png';
 
 interface Pesquisa {
   id: string;
@@ -367,10 +368,14 @@ export default function Responder() {
   }
 
   return (
-    <div className="min-h-screen flex items-center justify-center bg-background p-4">
-      <Card className="w-full max-w-2xl">
-        <CardHeader>
-          <CardTitle className="text-center">{pesquisa.nome}</CardTitle>
+    <div className="min-h-screen bg-background p-4">
+      <div className="flex justify-center py-6">
+        <img src={logoAva} alt="AVA - Assistente Virtual de Atendimento" className="h-16" />
+      </div>
+      <div className="flex items-center justify-center">
+        <Card className="w-full max-w-2xl">
+          <CardHeader>
+            <CardTitle className="text-center">{pesquisa.nome}</CardTitle>
           {pesquisa.descricao && (
             <p className="text-center text-muted-foreground">{pesquisa.descricao}</p>
           )}
@@ -394,7 +399,8 @@ export default function Responder() {
             {loading ? 'Enviando...' : 'Enviar Respostas'}
           </Button>
         </CardContent>
-      </Card>
+        </Card>
+      </div>
     </div>
   );
 }

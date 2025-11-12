@@ -9,7 +9,7 @@ const Index = () => {
     <div className="min-h-screen bg-white text-black">
       <Header />
       <div className="max-w-4xl mx-auto space-y-6 p-6">
-        <h1 className="text-3xl font-bold">NPS GHAS - Dashboard Principal</h1>
+        <h1 className="text-3xl font-bold">Pesquisa GHAS - Dashboard Principal</h1>
         
         <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
           <Card>
