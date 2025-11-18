@@ -10,6 +10,7 @@ import { Label } from '@/components/ui/label';
 import { supabase } from '@/integrations/supabase/client';
 import { useToast } from '@/hooks/use-toast';
 import logoAva from '@/assets/logo-ava.png';
+import logoGhas from '@/assets/logo-ghas.png';
 
 interface Pesquisa {
   id: string;
@@ -369,6 +370,11 @@ export default function Responder() {
 
   return (
     <div className="min-h-screen bg-background p-4">
+      {/* Logo GHAS no canto superior esquerdo */}
+      <div className="fixed top-4 left-4 z-50">
+        <img src={logoGhas} alt="GHAS Tecnologia" className="h-12 md:h-16" />
+      </div>
+      
       <div className="flex justify-center py-6">
         <img src={logoAva} alt="AVA - Assistente Virtual de Atendimento" className="h-16" />
       </div>
