@@ -82,6 +82,12 @@ const DashboardPage = () => {
 
       if (error) throw error;
       setCategorias(data || []);
+      
+      // Definir primeira categoria NPS como padrão
+      const primeiraNPS = (data || []).find(cat => cat.is_nps);
+      if (primeiraNPS && !filtroCategoria) {
+        setFiltroCategoria(primeiraNPS.nome);
+      }
     } catch (error) {
       console.error('Erro ao buscar categorias:', error);
     }
