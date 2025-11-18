@@ -134,17 +134,10 @@ const ConfigPage = () => {
   };
 
   const buscarUsuarios = async () => {
-    // Buscar profiles com seus roles
+    // Buscar profiles
     const { data: profiles, error: profilesError } = await supabase
       .from('profiles')
-      .select(`
-        id,
-        full_name,
-        created_at,
-        user_roles (
-          role
-        )
-      `);
+      .select('id, full_name, created_at');
 
     if (profilesError) {
       console.error('Erro ao buscar profiles:', profilesError);
@@ -156,20 +149,38 @@ const ConfigPage = () => {
       return;
     }
 
-    // Para cada profile, buscar o email do usuário
-    const usuariosCompletos: Usuario[] = await Promise.all(
-      (profiles || []).map(async (profile: any) => {
-        const { data: { user } } = await supabase.auth.admin.getUserById(profile.id);
-        
-        return {
-          id: profile.id,
-          full_name: profile.full_name,
-          email: user?.email || '',
-          role: profile.user_roles?.[0]?.role || 'user',
-          created_at: profile.created_at
-        };
-      })
+    // Buscar roles
+    const { data: roles, error: rolesError } = await supabase
+      .from('user_roles')
+      .select('user_id, role');
+
+    if (rolesError) {
+      console.error('Erro ao buscar roles:', rolesError);
+      return;
+    }
+
+    // Criar mapa de roles por user_id
+    const rolesMap = new Map(roles?.map(r => [r.user_id, r.role]) || []);
+
+    // Buscar emails dos usuários através da edge function
+    const { data: usersData, error: usersError } = await supabase.functions.invoke('list-users');
+
+    if (usersError) {
+      console.error('Erro ao buscar emails:', usersError);
+      // Continuar sem emails se der erro
+    }
+
+    const emailsMap = new Map(
+      usersData?.users?.map((u: any) => [u.id, u.email]) || []
     );
+
+    const usuariosCompletos: Usuario[] = (profiles || []).map(profile => ({
+      id: profile.id,
+      full_name: profile.full_name,
+      email: (emailsMap.get(profile.id) as string) || 'Email não disponível',
+      role: (rolesMap.get(profile.id) as 'admin' | 'user') || 'user',
+      created_at: profile.created_at
+    }));
 
     setUsuarios(usuariosCompletos);
   };
