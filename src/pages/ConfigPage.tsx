@@ -7,7 +7,7 @@ import { Select, SelectTrigger, SelectValue, SelectContent, SelectItem } from "@
 import { useToast } from "@/hooks/use-toast";
 import { supabase } from "@/integrations/supabase/client";
 import { Checkbox } from "@/components/ui/checkbox";
-import { Search, Trash2, UserPlus } from "lucide-react";
+import { Search, Trash2, UserPlus, Pencil } from "lucide-react";
 import {
   Table,
   TableBody,
@@ -16,6 +16,7 @@ import {
   TableHeader,
   TableRow,
 } from "@/components/ui/table";
+import { EditUserDialog } from "@/components/EditUserDialog";
 
 interface Categoria {
   id: string;
@@ -29,6 +30,7 @@ interface Usuario {
   email: string;
   role: 'admin' | 'user';
   created_at: string;
+  must_change_password?: boolean;
 }
 
 const ConfigPage = () => {
@@ -44,6 +46,8 @@ const ConfigPage = () => {
   const [emailUsuario, setEmailUsuario] = useState("");
   const [senhaUsuario, setSenhaUsuario] = useState("");
   const [permissaoUsuario, setPermissaoUsuario] = useState<'admin' | 'user'>('user');
+  const [editandoUsuario, setEditandoUsuario] = useState<Usuario | null>(null);
+  const [dialogEditOpen, setDialogEditOpen] = useState(false);
   
   const { toast } = useToast();
 
@@ -371,14 +375,27 @@ const ConfigPage = () => {
                             </span>
                           </TableCell>
                           <TableCell className="text-right">
-                            <Button
-                              variant="ghost"
-                              size="icon"
-                              onClick={() => excluirUsuario(usuario.id)}
-                              className="text-destructive hover:text-destructive"
-                            >
-                              <Trash2 className="w-4 h-4" />
-                            </Button>
+                            <div className="flex gap-2 justify-end">
+                              <Button
+                                variant="ghost"
+                                size="icon"
+                                onClick={() => {
+                                  setEditandoUsuario(usuario);
+                                  setDialogEditOpen(true);
+                                }}
+                                className="text-primary hover:text-primary"
+                              >
+                                <Pencil className="w-4 h-4" />
+                              </Button>
+                              <Button
+                                variant="ghost"
+                                size="icon"
+                                onClick={() => excluirUsuario(usuario.id)}
+                                className="text-destructive hover:text-destructive"
+                              >
+                                <Trash2 className="w-4 h-4" />
+                              </Button>
+                            </div>
                           </TableCell>
                         </TableRow>
                       ))
@@ -460,6 +477,13 @@ const ConfigPage = () => {
           </CardContent>
         </Card>
       </div>
+
+      <EditUserDialog
+        open={dialogEditOpen}
+        onOpenChange={setDialogEditOpen}
+        usuario={editandoUsuario}
+        onSuccess={buscarUsuarios}
+      />
     </div>
   );
 };
