@@ -4,7 +4,7 @@ import { Card, CardContent } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { Select, SelectTrigger, SelectValue, SelectContent, SelectItem } from "@/components/ui/select";
 import { BarChart, Bar, XAxis, YAxis, Tooltip, ResponsiveContainer } from "recharts";
-import { format } from "date-fns";
+import { format, startOfMonth, endOfMonth } from "date-fns";
 import { supabase } from "@/integrations/supabase/client";
 
 interface Resposta {
@@ -48,10 +48,15 @@ interface RespostaAgrupada {
 }
 
 const DashboardPage = () => {
+  // Definir primeiro e último dia do mês atual como padrão
+  const hoje = new Date();
+  const primeiroDiaMes = format(startOfMonth(hoje), 'yyyy-MM-dd');
+  const ultimoDiaMes = format(endOfMonth(hoje), 'yyyy-MM-dd');
+  
   const [filtroNome, setFiltroNome] = useState("");
   const [filtroEmpresa, setFiltroEmpresa] = useState("");
-  const [filtroDataInicio, setFiltroDataInicio] = useState("");
-  const [filtroDataFim, setFiltroDataFim] = useState("");
+  const [filtroDataInicio, setFiltroDataInicio] = useState(primeiroDiaMes);
+  const [filtroDataFim, setFiltroDataFim] = useState(ultimoDiaMes);
   const [filtroCategoria, setFiltroCategoria] = useState("");
   const [respostas, setRespostas] = useState<Resposta[]>([]);
   const [pesquisas, setPesquisas] = useState<Pesquisa[]>([]);
