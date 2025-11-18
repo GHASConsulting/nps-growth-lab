@@ -391,7 +391,7 @@ export default function Responder() {
             <div key={pergunta.id}>
               <h3 className="text-lg font-medium mb-4">
                 {index + 1}. {pergunta.texto}
-                {pergunta.obrigatoria && <span className="text-destructive ml-1">*</span>}
+                {pergunta.obrigatoria && <span className="text-red-600 ml-1 font-bold">*</span>}
               </h3>
               {renderizarCampoPergunta(pergunta)}
             </div>
