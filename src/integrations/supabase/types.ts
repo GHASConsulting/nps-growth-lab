@@ -155,6 +155,7 @@ export type Database = {
           pergunta_id: string
           pesquisa_id: string
           respondido_em: string
+          resposta_grupo_id: string
           valor_data: string | null
           valor_numero: number | null
           valor_texto: string | null
@@ -165,6 +166,7 @@ export type Database = {
           pergunta_id: string
           pesquisa_id: string
           respondido_em?: string
+          resposta_grupo_id?: string
           valor_data?: string | null
           valor_numero?: number | null
           valor_texto?: string | null
@@ -175,6 +177,7 @@ export type Database = {
           pergunta_id?: string
           pesquisa_id?: string
           respondido_em?: string
+          resposta_grupo_id?: string
           valor_data?: string | null
           valor_numero?: number | null
           valor_texto?: string | null

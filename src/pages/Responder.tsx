@@ -38,6 +38,7 @@ export default function Responder() {
   const [respostas, setRespostas] = useState<Record<string, any>>({});
   const [loading, setLoading] = useState(true);
   const [enviado, setEnviado] = useState(false);
+  const [respostaGrupoId] = useState<string>(crypto.randomUUID());
 
   useEffect(() => {
     if (pesquisaId) {
@@ -141,7 +142,8 @@ export default function Responder() {
         const resposta: any = {
           pesquisa_id: pesquisaId,
           pergunta_id: pergunta.id,
-          canal: 'web'
+          canal: 'web',
+          resposta_grupo_id: respostaGrupoId
         };
 
         switch (pergunta.tipo_resposta) {
