@@ -259,7 +259,7 @@ export default function Responder() {
       case 'campo':
         return (
           <Textarea
-            placeholder="Sua resposta (opcional)"
+            placeholder="Sua resposta"
             value={valor}
             onChange={(e) => atualizarResposta(pergunta.id, e.target.value)}
             className="min-h-[100px]"
