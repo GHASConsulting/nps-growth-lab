@@ -184,61 +184,30 @@ const ConfigPage = () => {
       return;
     }
 
-    // Criar usuário no auth
-    const { data: authData, error: authError } = await supabase.auth.signUp({
-      email: emailUsuario,
-      password: senhaUsuario,
+    // Chamar edge function para criar usuário
+    const { data, error } = await supabase.functions.invoke('create-user', {
+      body: {
+        email: emailUsuario,
+        password: senhaUsuario,
+        full_name: nomeUsuario,
+        role: permissaoUsuario
+      }
     });
 
-    if (authError) {
+    if (error) {
+      console.error('Erro ao criar usuário:', error);
       toast({
         title: "Erro",
-        description: authError.message,
+        description: error.message || "Erro ao criar usuário!",
         variant: "destructive",
       });
       return;
     }
 
-    if (!authData.user) {
+    if (data?.error) {
       toast({
         title: "Erro",
-        description: "Erro ao criar usuário!",
-        variant: "destructive",
-      });
-      return;
-    }
-
-    // Criar profile
-    const { error: profileError } = await supabase
-      .from('profiles')
-      .insert([{
-        id: authData.user.id,
-        full_name: nomeUsuario
-      }]);
-
-    if (profileError) {
-      console.error('Erro ao criar profile:', profileError);
-      toast({
-        title: "Erro",
-        description: "Erro ao criar perfil do usuário!",
-        variant: "destructive",
-      });
-      return;
-    }
-
-    // Criar role
-    const { error: roleError } = await supabase
-      .from('user_roles')
-      .insert([{
-        user_id: authData.user.id,
-        role: permissaoUsuario
-      }]);
-
-    if (roleError) {
-      console.error('Erro ao criar role:', roleError);
-      toast({
-        title: "Erro",
-        description: "Erro ao definir permissão do usuário!",
+        description: data.error,
         variant: "destructive",
       });
       return;
