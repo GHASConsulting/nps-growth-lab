@@ -16,6 +16,7 @@ interface Resposta {
   valor_data?: string;
   respondido_em: string;
   canal?: string;
+  resposta_grupo_id: string;
 }
 
 interface Pesquisa {
@@ -44,6 +45,7 @@ interface Pergunta {
 interface RespostaAgrupada {
   respondido_em: string;
   pesquisa_id: string;
+  resposta_grupo_id: string;
   respostas: Map<string, Resposta>;
 }
 
@@ -217,12 +219,12 @@ const DashboardPage = () => {
     
     // Buscar pergunta marcada como Nome Responsável
     const perguntaNome = perguntas.find(p => p.is_nome_responsavel && p.pesquisa_id === resposta.pesquisa_id);
-    const respostaNome = perguntaNome ? respostas.find(r => r.pergunta_id === perguntaNome.id && r.respondido_em === resposta.respondido_em) : null;
+    const respostaNome = perguntaNome ? respostas.find(r => r.pergunta_id === perguntaNome.id && r.resposta_grupo_id === resposta.resposta_grupo_id) : null;
     const matchNome = !filtroNome || (respostaNome?.valor_texto && respostaNome.valor_texto.toLowerCase().includes(filtroNome.toLowerCase()));
     
     // Buscar pergunta marcada como Instituição
     const perguntaInstituicao = perguntas.find(p => p.is_instituicao && p.pesquisa_id === resposta.pesquisa_id);
-    const respostaInstituicao = perguntaInstituicao ? respostas.find(r => r.pergunta_id === perguntaInstituicao.id && r.respondido_em === resposta.respondido_em) : null;
+    const respostaInstituicao = perguntaInstituicao ? respostas.find(r => r.pergunta_id === perguntaInstituicao.id && r.resposta_grupo_id === resposta.resposta_grupo_id) : null;
     const matchEmpresa = !filtroEmpresa || (respostaInstituicao?.valor_texto && respostaInstituicao.valor_texto.toLowerCase().includes(filtroEmpresa.toLowerCase()));
     
     // Filtro por range de datas
@@ -234,17 +236,18 @@ const DashboardPage = () => {
     return matchNome && matchEmpresa && matchDataInicio && matchDataFim && matchCategoria;
   });
 
-  // Agrupar respostas por sessão (pesquisa_id + respondido_em)
+  // Agrupar respostas por resposta_grupo_id
   const respostasAgrupadas: RespostaAgrupada[] = [];
   const gruposMap = new Map<string, RespostaAgrupada>();
 
   respostasFiltradas.forEach(resposta => {
-    const chaveGrupo = `${resposta.pesquisa_id}_${resposta.respondido_em}`;
+    const chaveGrupo = resposta.resposta_grupo_id;
     
     if (!gruposMap.has(chaveGrupo)) {
       gruposMap.set(chaveGrupo, {
         respondido_em: resposta.respondido_em,
         pesquisa_id: resposta.pesquisa_id,
+        resposta_grupo_id: resposta.resposta_grupo_id,
         respostas: new Map()
       });
     }
