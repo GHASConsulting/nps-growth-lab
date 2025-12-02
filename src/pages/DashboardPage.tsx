@@ -2,10 +2,14 @@ import React, { useState, useEffect } from "react";
 import { Link } from "react-router-dom";
 import { Card, CardContent } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
+import { Button } from "@/components/ui/button";
 import { Select, SelectTrigger, SelectValue, SelectContent, SelectItem } from "@/components/ui/select";
 import { BarChart, Bar, XAxis, YAxis, Tooltip, ResponsiveContainer } from "recharts";
 import { format, startOfMonth, endOfMonth } from "date-fns";
 import { supabase } from "@/integrations/supabase/client";
+import * as XLSX from 'xlsx';
+import { Download } from "lucide-react";
+import { toast } from "sonner";
 
 interface Resposta {
   id: string;
@@ -217,6 +221,70 @@ const DashboardPage = () => {
     return "Zona de Excelência";
   };
 
+  const exportarParaExcel = () => {
+    try {
+      // Preparar dados para exportação
+      const dadosExportacao: any[] = [];
+      
+      respostasAgrupadas.forEach((grupo) => {
+        const pesquisa = pesquisas.find(p => p.id === grupo.pesquisa_id);
+        const perguntasDaPesquisa = perguntas
+          .filter(p => p.pesquisa_id === grupo.pesquisa_id)
+          .sort((a, b) => a.ordem - b.ordem);
+        
+        const linha: any = {
+          'Data de Resposta': format(new Date(grupo.respondido_em), 'dd/MM/yyyy HH:mm'),
+          'Pesquisa': pesquisa?.nome || 'N/A',
+          'Categoria': pesquisa?.categoria || 'N/A',
+        };
+        
+        // Adicionar cada pergunta e resposta como coluna
+        perguntasDaPesquisa.forEach((pergunta, idx) => {
+          const resposta = grupo.respostas.get(pergunta.id);
+          let valorResposta = 'N/A';
+          
+          if (resposta) {
+            if (resposta.valor_texto) valorResposta = resposta.valor_texto;
+            else if (resposta.valor_numero !== null && resposta.valor_numero !== undefined) valorResposta = String(resposta.valor_numero);
+            else if (resposta.valor_data) valorResposta = format(new Date(resposta.valor_data), 'dd/MM/yyyy');
+          }
+          
+          linha[`P${idx + 1}: ${pergunta.texto}`] = valorResposta;
+        });
+        
+        // Adicionar canal se existir
+        const primeiraResposta = Array.from(grupo.respostas.values())[0];
+        if (primeiraResposta?.canal) {
+          linha['Canal'] = primeiraResposta.canal;
+        }
+        
+        dadosExportacao.push(linha);
+      });
+      
+      if (dadosExportacao.length === 0) {
+        toast.error('Nenhuma resposta para exportar com os filtros atuais');
+        return;
+      }
+      
+      // Criar workbook e worksheet
+      const ws = XLSX.utils.json_to_sheet(dadosExportacao);
+      const wb = XLSX.utils.book_new();
+      XLSX.utils.book_append_sheet(wb, ws, 'Respostas');
+      
+      // Gerar nome do arquivo com data atual
+      const dataAtual = format(new Date(), 'yyyy-MM-dd_HHmm');
+      const nomeArquivo = `respostas_pesquisa_${dataAtual}.xlsx`;
+      
+      // Fazer download
+      XLSX.writeFile(wb, nomeArquivo);
+      
+      toast.success(`Arquivo exportado com sucesso! ${dadosExportacao.length} respostas`);
+    } catch (error) {
+      console.error('Erro ao exportar:', error);
+      toast.error('Erro ao exportar dados para Excel');
+    }
+  };
+
   const respostasFiltradas = respostas.filter(resposta => {
     const pesquisaDaResposta = pesquisas.find(p => p.id === resposta.pesquisa_id);
     
@@ -266,7 +334,13 @@ const DashboardPage = () => {
   return (
     <div className="min-h-screen bg-white text-black">
       <div className="max-w-6xl mx-auto space-y-6 p-6">
-        <h1 className="text-3xl font-bold">Dashboard</h1>
+        <div className="flex justify-between items-center">
+          <h1 className="text-3xl font-bold">Dashboard</h1>
+          <Button onClick={exportarParaExcel} className="gap-2">
+            <Download className="h-4 w-4" />
+            Exportar para Excel
+          </Button>
+        </div>
 
         <Card>
           <CardContent className="space-y-4 pt-6">
