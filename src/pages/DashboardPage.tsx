@@ -60,6 +60,7 @@ const DashboardPage = () => {
   const [filtroDataInicio, setFiltroDataInicio] = useState(primeiroDiaMes);
   const [filtroDataFim, setFiltroDataFim] = useState(ultimoDiaMes);
   const [filtroCategoria, setFiltroCategoria] = useState("");
+  const [filtroPesquisa, setFiltroPesquisa] = useState("");
   const [respostas, setRespostas] = useState<Resposta[]>([]);
   const [pesquisas, setPesquisas] = useState<Pesquisa[]>([]);
   const [categorias, setCategorias] = useState<Categoria[]>([]);
@@ -102,7 +103,7 @@ const DashboardPage = () => {
 
   useEffect(() => {
     gerarDadosGrafico();
-  }, [respostas, filtroNome, filtroEmpresa, filtroDataInicio, filtroDataFim, filtroCategoria]);
+  }, [respostas, filtroNome, filtroEmpresa, filtroDataInicio, filtroDataFim, filtroCategoria, filtroPesquisa]);
 
   const buscarRespostas = async () => {
     try {
@@ -166,7 +167,9 @@ const DashboardPage = () => {
       const matchDataFim = !filtroDataFim || dataResposta <= filtroDataFim;
       
       const matchCategoria = !filtroCategoria || filtroCategoria === "todos" || (pesquisaDaResposta?.categoria && pesquisaDaResposta.categoria === filtroCategoria);
-      return matchNome && matchEmpresa && matchDataInicio && matchDataFim && matchCategoria;
+      const matchPesquisa = !filtroPesquisa || filtroPesquisa === "todas" || resposta.pesquisa_id === filtroPesquisa;
+      
+      return matchNome && matchEmpresa && matchDataInicio && matchDataFim && matchCategoria && matchPesquisa;
     });
 
     const dadosNPS = Array.from({ length: 11 }, (_, i) => ({
@@ -233,7 +236,9 @@ const DashboardPage = () => {
     const matchDataFim = !filtroDataFim || dataResposta <= filtroDataFim;
     
     const matchCategoria = !filtroCategoria || filtroCategoria === "todos" || (pesquisaDaResposta?.categoria && pesquisaDaResposta.categoria === filtroCategoria);
-    return matchNome && matchEmpresa && matchDataInicio && matchDataFim && matchCategoria;
+    const matchPesquisa = !filtroPesquisa || filtroPesquisa === "todas" || resposta.pesquisa_id === filtroPesquisa;
+    
+    return matchNome && matchEmpresa && matchDataInicio && matchDataFim && matchCategoria && matchPesquisa;
   });
 
   // Agrupar respostas por resposta_grupo_id
@@ -266,35 +271,20 @@ const DashboardPage = () => {
         <Card>
           <CardContent className="space-y-4 pt-6">
             <h2 className="text-xl font-semibold">Filtros</h2>
-            <div className="grid grid-cols-1 md:grid-cols-5 gap-4">
-              <Input 
-                placeholder="Filtrar por Nome" 
-                value={filtroNome} 
-                onChange={(e) => setFiltroNome(e.target.value)} 
-              />
-              <Input 
-                placeholder="Filtrar por Empresa" 
-                value={filtroEmpresa} 
-                onChange={(e) => setFiltroEmpresa(e.target.value)} 
-              />
-              <div className="space-y-1">
-                <Input 
-                  type="date" 
-                  placeholder="Data Início" 
-                  value={filtroDataInicio} 
-                  onChange={(e) => setFiltroDataInicio(e.target.value)} 
-                />
-                <p className="text-xs text-muted-foreground">Data Início</p>
-              </div>
-              <div className="space-y-1">
-                <Input 
-                  type="date" 
-                  placeholder="Data Fim" 
-                  value={filtroDataFim} 
-                  onChange={(e) => setFiltroDataFim(e.target.value)} 
-                />
-                <p className="text-xs text-muted-foreground">Data Fim</p>
-              </div>
+            <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+              <Select value={filtroPesquisa} onValueChange={setFiltroPesquisa}>
+                <SelectTrigger>
+                  <SelectValue placeholder="Selecione uma pesquisa" />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="todas">Todas as pesquisas</SelectItem>
+                  {pesquisas.map((pesquisa) => (
+                    <SelectItem key={pesquisa.id} value={pesquisa.id}>
+                      {pesquisa.nome}
+                    </SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
               <Select value={filtroCategoria} onValueChange={setFiltroCategoria}>
                 <SelectTrigger>
                   <SelectValue placeholder="Filtrar por Categoria" />
@@ -308,6 +298,36 @@ const DashboardPage = () => {
                   ))}
                 </SelectContent>
               </Select>
+              <div className="space-y-1">
+                <Input 
+                  type="date" 
+                  placeholder="Data Início" 
+                  value={filtroDataInicio} 
+                  onChange={(e) => setFiltroDataInicio(e.target.value)} 
+                />
+                <p className="text-xs text-muted-foreground">Data Início</p>
+              </div>
+            </div>
+            <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+              <div className="space-y-1">
+                <Input 
+                  type="date" 
+                  placeholder="Data Fim" 
+                  value={filtroDataFim} 
+                  onChange={(e) => setFiltroDataFim(e.target.value)} 
+                />
+                <p className="text-xs text-muted-foreground">Data Fim</p>
+              </div>
+              <Input 
+                placeholder="Filtrar por Nome" 
+                value={filtroNome} 
+                onChange={(e) => setFiltroNome(e.target.value)} 
+              />
+              <Input 
+                placeholder="Filtrar por Empresa" 
+                value={filtroEmpresa} 
+                onChange={(e) => setFiltroEmpresa(e.target.value)} 
+              />
             </div>
           </CardContent>
         </Card>
