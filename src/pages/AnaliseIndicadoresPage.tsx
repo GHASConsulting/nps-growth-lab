@@ -45,7 +45,8 @@ interface RespostaAgrupada {
 const AnaliseIndicadoresPage = () => {
   const [pesquisas, setPesquisas] = useState<Pesquisa[]>([]);
   const [pesquisaSelecionada, setPesquisaSelecionada] = useState("");
-  const [dataFiltro, setDataFiltro] = useState("");
+  const [dataInicio, setDataInicio] = useState("");
+  const [dataFim, setDataFim] = useState("");
   const [respostasAgrupadas, setRespostasAgrupadas] = useState<RespostaAgrupada[]>([]);
   const [perguntasGpt, setPerguntasGpt] = useState<Pergunta[]>([]);
   const [carregando, setCarregando] = useState(false);
@@ -57,13 +58,13 @@ const AnaliseIndicadoresPage = () => {
   }, []);
 
   useEffect(() => {
-    if (pesquisaSelecionada && dataFiltro) {
+    if (pesquisaSelecionada && dataInicio && dataFim) {
       buscarRespostas();
     } else {
       setRespostasAgrupadas([]);
       setPerguntasGpt([]);
     }
-  }, [pesquisaSelecionada, dataFiltro]);
+  }, [pesquisaSelecionada, dataInicio, dataFim]);
 
   const buscarPesquisas = async () => {
     try {
@@ -119,17 +120,17 @@ const AnaliseIndicadoresPage = () => {
       if (todasPerguntasError) throw todasPerguntasError;
 
       // Buscar respostas filtradas por data
-      const dataInicio = new Date(dataFiltro);
-      dataInicio.setHours(0, 0, 0, 0);
-      const dataFim = new Date(dataFiltro);
-      dataFim.setHours(23, 59, 59, 999);
+      const dataInicioFilter = new Date(dataInicio);
+      dataInicioFilter.setHours(0, 0, 0, 0);
+      const dataFimFilter = new Date(dataFim);
+      dataFimFilter.setHours(23, 59, 59, 999);
 
       const { data: respostasData, error: respostasError } = await supabase
         .from('respostas')
         .select('*')
         .eq('pesquisa_id', pesquisaSelecionada)
-        .gte('respondido_em', dataInicio.toISOString())
-        .lte('respondido_em', dataFim.toISOString());
+        .gte('respondido_em', dataInicioFilter.toISOString())
+        .lte('respondido_em', dataFimFilter.toISOString());
 
       if (respostasError) throw respostasError;
 
@@ -277,7 +278,7 @@ const AnaliseIndicadoresPage = () => {
 
         <Card>
           <CardContent className="pt-6">
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+            <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
               <div>
                 <label className="block text-sm font-medium mb-2">Pesquisa</label>
                 <Select value={pesquisaSelecionada} onValueChange={setPesquisaSelecionada}>
@@ -294,22 +295,30 @@ const AnaliseIndicadoresPage = () => {
                 </Select>
               </div>
               <div>
-                <label className="block text-sm font-medium mb-2">Data</label>
+                <label className="block text-sm font-medium mb-2">Data Início</label>
                 <Input
                   type="date"
-                  value={dataFiltro}
-                  onChange={(e) => setDataFiltro(e.target.value)}
+                  value={dataInicio}
+                  onChange={(e) => setDataInicio(e.target.value)}
+                />
+              </div>
+              <div>
+                <label className="block text-sm font-medium mb-2">Data Fim</label>
+                <Input
+                  type="date"
+                  value={dataFim}
+                  onChange={(e) => setDataFim(e.target.value)}
                 />
               </div>
             </div>
           </CardContent>
         </Card>
 
-        {!pesquisaSelecionada || !dataFiltro ? (
+        {!pesquisaSelecionada || !dataInicio || !dataFim ? (
           <Card>
             <CardContent className="pt-6">
               <p className="text-center text-muted-foreground py-8">
-                Selecione uma pesquisa e uma data para visualizar as respostas
+                Selecione uma pesquisa e o período para visualizar as respostas
               </p>
             </CardContent>
           </Card>
