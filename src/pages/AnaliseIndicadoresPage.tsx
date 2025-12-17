@@ -201,21 +201,21 @@ const AnaliseIndicadoresPage = () => {
     
     // Buscar webhook URL do localStorage
     const integracoes = localStorage.getItem('integracoes');
-    let webhookUrl = '';
+    let n8nWebhookUrl = '';
     
     if (integracoes) {
       try {
         const parsed = JSON.parse(integracoes);
-        webhookUrl = parsed.webhookUrl || '';
+        n8nWebhookUrl = parsed.n8nWebhookUrl || parsed.webhookUrl || '';
       } catch (e) {
         console.error('Erro ao parsear integrações:', e);
       }
     }
 
-    if (!webhookUrl) {
+    if (!n8nWebhookUrl) {
       toast({
         title: "Erro",
-        description: "Configure o Webhook na aba Integração antes de solicitar avaliação",
+        description: "Configure o Webhook N8N na aba Integração antes de solicitar avaliação",
         variant: "destructive",
       });
       return;
@@ -235,7 +235,7 @@ const AnaliseIndicadoresPage = () => {
         pesquisa_id: pesquisaSelecionada,
       };
 
-      const response = await fetch(webhookUrl, {
+      const response = await fetch(n8nWebhookUrl, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
