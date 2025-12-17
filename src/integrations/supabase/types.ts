@@ -44,6 +44,7 @@ export type Database = {
       perguntas: {
         Row: {
           created_at: string
+          enviar_para_gpt: boolean
           id: string
           is_instituicao: boolean
           is_nome_responsavel: boolean
@@ -56,6 +57,7 @@ export type Database = {
         }
         Insert: {
           created_at?: string
+          enviar_para_gpt?: boolean
           id?: string
           is_instituicao?: boolean
           is_nome_responsavel?: boolean
@@ -68,6 +70,7 @@ export type Database = {
         }
         Update: {
           created_at?: string
+          enviar_para_gpt?: boolean
           id?: string
           is_instituicao?: boolean
           is_nome_responsavel?: boolean
