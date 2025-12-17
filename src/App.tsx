@@ -14,6 +14,7 @@ import PesquisaPage from "./pages/PesquisaPage";
 import DashboardPage from "./pages/DashboardPage";
 import ConfigPage from "./pages/ConfigPage";
 import IntegracoesPage from "./pages/IntegracoesPage";
+import AnaliseIndicadoresPage from "./pages/AnaliseIndicadoresPage";
 import NotFound from "./pages/NotFound";
 
 const queryClient = new QueryClient();
@@ -61,6 +62,13 @@ const App = () => (
               <ProtectedRoute>
                 <Layout>
                   <IntegracoesPage />
+                </Layout>
+              </ProtectedRoute>
+            } />
+            <Route path="/analise-indicadores" element={
+              <ProtectedRoute>
+                <Layout>
+                  <AnaliseIndicadoresPage />
                 </Layout>
               </ProtectedRoute>
             } />

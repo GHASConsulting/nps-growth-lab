@@ -48,6 +48,7 @@ const PesquisaPage = () => {
   const [ordemPergunta, setOrdemPergunta] = useState<string>("");
   const [isNomeResponsavel, setIsNomeResponsavel] = useState(false);
   const [isInstituicao, setIsInstituicao] = useState(false);
+  const [enviarParaGpt, setEnviarParaGpt] = useState(false);
   const [pesquisas, setPesquisas] = useState<Pesquisa[]>([]);
   const [perguntas, setPerguntas] = useState<Pergunta[]>([]);
   const [pesquisaSelecionada, setPesquisaSelecionada] = useState<string>("");
@@ -245,7 +246,8 @@ const PesquisaPage = () => {
             opcoes: (tipoPergunta === 'radio' || tipoPergunta === 'checkbox') ? opcoes : [],
             obrigatoria: perguntaObrigatoria,
             is_nome_responsavel: isNomeResponsavel,
-            is_instituicao: isInstituicao
+            is_instituicao: isInstituicao,
+            enviar_para_gpt: enviarParaGpt
           })
           .eq('id', editandoPerguntaId)
           .select()
@@ -270,7 +272,8 @@ const PesquisaPage = () => {
             opcoes: (tipoPergunta === 'radio' || tipoPergunta === 'checkbox') ? opcoes : [],
             obrigatoria: perguntaObrigatoria,
             is_nome_responsavel: isNomeResponsavel,
-            is_instituicao: isInstituicao
+            is_instituicao: isInstituicao,
+            enviar_para_gpt: enviarParaGpt
           })
           .select()
           .single();
@@ -291,6 +294,7 @@ const PesquisaPage = () => {
       setOrdemPergunta("");
       setIsNomeResponsavel(false);
       setIsInstituicao(false);
+      setEnviarParaGpt(false);
     } catch (error) {
       console.error('Erro ao salvar pergunta:', error);
       toast({
@@ -309,6 +313,7 @@ const PesquisaPage = () => {
     setOrdemPergunta(String(pergunta.ordem));
     setIsNomeResponsavel((pergunta as any).is_nome_responsavel || false);
     setIsInstituicao((pergunta as any).is_instituicao || false);
+    setEnviarParaGpt((pergunta as any).enviar_para_gpt || false);
     setEditandoPerguntaId(pergunta.id);
   };
 
@@ -338,6 +343,7 @@ const PesquisaPage = () => {
     setOrdemPergunta("");
     setIsNomeResponsavel(false);
     setIsInstituicao(false);
+    setEnviarParaGpt(false);
   };
 
   const deletarPergunta = async (id: string) => {
@@ -643,6 +649,17 @@ const PesquisaPage = () => {
               />
               <Label htmlFor="instituicao" className="cursor-pointer">
                 Instituição (usar no filtro do Dashboard)
+              </Label>
+            </div>
+
+            <div className="flex items-center space-x-2">
+              <Checkbox 
+                id="enviar-para-gpt" 
+                checked={enviarParaGpt} 
+                onCheckedChange={(checked) => setEnviarParaGpt(checked === true)} 
+              />
+              <Label htmlFor="enviar-para-gpt" className="cursor-pointer">
+                Enviar para GPT (disponível na Análise de Indicadores)
               </Label>
             </div>
 
