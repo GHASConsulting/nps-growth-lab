@@ -1,12 +1,12 @@
 import React, { useState, useEffect } from 'react';
-import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
+import { Card, CardContent, CardHeader } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 
 import { useAuth } from '@/contexts/AuthContext';
 import { useNavigate } from 'react-router-dom';
 import { toast } from '@/hooks/use-toast';
-import logoAva from '@/assets/logo-ava.png';
+import Logo from '@/components/Logo';
 
 export default function Auth() {
   const [email, setEmail] = useState('');
@@ -49,10 +49,8 @@ export default function Auth() {
     <div className="min-h-screen flex items-center justify-center bg-background p-4">
       <Card className="w-full max-w-md">
         <CardHeader className="flex flex-col items-center">
-          <img src={logoAva} alt="AVA - Assistente Virtual de Atendimento" className="h-16 mb-4" />
-          <CardTitle className="text-center text-2xl font-bold">
-            Pesquisa GHAS
-          </CardTitle>
+          <Logo size="lg" />
+          <p className="text-muted-foreground mt-2">Sistema de Pesquisas</p>
         </CardHeader>
         <CardContent>
           <form onSubmit={handleSignIn} className="space-y-4">

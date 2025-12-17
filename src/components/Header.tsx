@@ -1,10 +1,10 @@
 import React from "react";
-import { Link, useNavigate, useLocation } from "react-router-dom";
+import { useNavigate, useLocation } from "react-router-dom";
 import { Button } from "@/components/ui/button";
 import { LogOut } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 import { useToast } from "@/hooks/use-toast";
-import logoAva from "@/assets/logo-ava.png";
+import Logo from "@/components/Logo";
 
 interface MenuGroup {
   id: string;
@@ -66,9 +66,7 @@ const Header = () => {
   return (
     <header className="sticky top-0 z-50 bg-white border-b border-border py-4 px-6">
       <div className="max-w-7xl mx-auto flex justify-between items-center">
-        <Link to="/" className="flex items-center">
-          <img src={logoAva} alt="AVA - Assistente Virtual de Atendimento" className="h-12" />
-        </Link>
+        <Logo linkTo="/" size="md" />
         
         <nav className="flex items-center gap-6">
           {menuGroups.map(group => (
