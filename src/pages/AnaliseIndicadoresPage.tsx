@@ -42,6 +42,10 @@ interface RespostaAgrupada {
   empresa?: string;
 }
 
+interface WebhookResponse {
+  [key: string]: string;
+}
+
 const AnaliseIndicadoresPage = () => {
   const [pesquisas, setPesquisas] = useState<Pesquisa[]>([]);
   const [pesquisaSelecionada, setPesquisaSelecionada] = useState("");
@@ -51,6 +55,7 @@ const AnaliseIndicadoresPage = () => {
   const [perguntasGpt, setPerguntasGpt] = useState<Pergunta[]>([]);
   const [carregando, setCarregando] = useState(false);
   const [enviandoIds, setEnviandoIds] = useState<Set<string>>(new Set());
+  const [webhookResponses, setWebhookResponses] = useState<WebhookResponse>({});
   const { toast } = useToast();
 
   useEffect(() => {
@@ -224,29 +229,28 @@ const AnaliseIndicadoresPage = () => {
     setEnviandoIds(prev => new Set(prev).add(chave));
 
     try {
-      const payload = {
-        resposta_id: respostaItem.resposta.id,
-        pergunta_id: respostaItem.pergunta.id,
-        resposta_texto: respostaItem.resposta.valor_texto || 
-                       respostaItem.resposta.valor_numero?.toString() || 
-                       respostaItem.resposta.valor_data || '',
-        nome_respondente: grupo.nome_respondente || '',
-        empresa: grupo.empresa || '',
-        pesquisa_id: pesquisaSelecionada,
-      };
+      const respostaTexto = respostaItem.resposta.valor_texto || 
+                           respostaItem.resposta.valor_numero?.toString() || 
+                           respostaItem.resposta.valor_data || '';
 
       const response = await fetch(n8nWebhookUrl, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
         },
-        mode: 'no-cors',
-        body: JSON.stringify(payload),
+        body: JSON.stringify({ resposta_texto: respostaTexto }),
       });
+
+      const responseText = await response.text();
+      
+      setWebhookResponses(prev => ({
+        ...prev,
+        [chave]: responseText,
+      }));
 
       toast({
         title: "Enviado",
-        description: "Solicitação enviada para avaliação do GPT",
+        description: "Solicitação enviada e resposta recebida",
       });
     } catch (error) {
       console.error('Erro ao enviar para webhook:', error);
@@ -367,6 +371,7 @@ const AnaliseIndicadoresPage = () => {
                   {grupo.respostas.map(({ pergunta, resposta }) => {
                     const chave = `${grupo.resposta_grupo_id}-${resposta.id}`;
                     const enviando = enviandoIds.has(chave);
+                    const webhookResponse = webhookResponses[chave];
 
                     return (
                       <div key={resposta.id} className="p-4 bg-muted/50 rounded-lg">
@@ -391,6 +396,19 @@ const AnaliseIndicadoresPage = () => {
                             </>
                           )}
                         </Button>
+                        
+                        {webhookResponse && (
+                          <div className="mt-4">
+                            <label className="block text-sm font-medium text-muted-foreground mb-1">
+                              Retorno do GPT
+                            </label>
+                            <textarea
+                              readOnly
+                              value={webhookResponse}
+                              className="w-full p-3 bg-background border border-border rounded-md text-sm min-h-[80px] resize-none cursor-default"
+                            />
+                          </div>
+                        )}
                       </div>
                     );
                   })}
