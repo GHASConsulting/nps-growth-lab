@@ -276,9 +276,8 @@ const AnaliseIndicadoresPage = () => {
   };
 
   return (
-    <div className="min-h-screen bg-white text-black">
-      <div className="max-w-6xl mx-auto space-y-6 p-6">
-        <h1 className="text-3xl font-bold">Análise de Indicadores</h1>
+    <div className="space-y-6">
+        <h2 className="text-xl font-semibold">Análise de Indicadores</h2>
 
         <Card>
           <CardContent className="pt-6">
@@ -417,7 +416,6 @@ const AnaliseIndicadoresPage = () => {
             ))}
           </div>
         )}
-      </div>
     </div>
   );
 };

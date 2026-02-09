@@ -18,8 +18,7 @@ const menuGroups: MenuGroup[] = [
     label: "Gestão de Pesquisa",
     items: [
       { label: "Cadastro de Pesquisa", path: "/pesquisa" },
-      { label: "Dashboard", path: "/dashboard" },
-      { label: "Análise de Indicadores", path: "/analise-indicadores" },
+      { label: "Indicadores", path: "/indicadores" },
     ],
   },
   {
