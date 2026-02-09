@@ -18,7 +18,13 @@ const menuGroups: MenuGroup[] = [
     id: "gestao-pesquisa",
     label: "Gestão de Pesquisa",
     defaultPath: "/pesquisa",
-    paths: ["/pesquisa", "/indicadores"],
+    paths: ["/pesquisa"],
+  },
+  {
+    id: "indicadores",
+    label: "Indicadores",
+    defaultPath: "/indicadores",
+    paths: ["/indicadores"],
   },
   {
     id: "administracao",

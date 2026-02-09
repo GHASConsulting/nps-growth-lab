@@ -18,7 +18,6 @@ const menuGroups: MenuGroup[] = [
     label: "Gestão de Pesquisa",
     items: [
       { label: "Cadastro de Pesquisa", path: "/pesquisa" },
-      { label: "Indicadores", path: "/indicadores" },
     ],
   },
   {
