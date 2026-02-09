@@ -7,14 +7,12 @@ import { AuthProvider } from "./contexts/AuthContext";
 import { PasswordChangeChecker } from "./components/PasswordChangeChecker";
 import ProtectedRoute from "./components/ProtectedRoute";
 import Layout from "./components/Layout";
-import Index from "./pages/Index";
 import Auth from "./pages/Auth";
 import Responder from "./pages/Responder";
 import PesquisaPage from "./pages/PesquisaPage";
-import DashboardPage from "./pages/DashboardPage";
 import ConfigPage from "./pages/ConfigPage";
 import IntegracoesPage from "./pages/IntegracoesPage";
-import AnaliseIndicadoresPage from "./pages/AnaliseIndicadoresPage";
+import IndicadoresPage from "./pages/IndicadoresPage";
 import NotFound from "./pages/NotFound";
 
 const queryClient = new QueryClient();
@@ -33,7 +31,7 @@ const App = () => (
             <Route path="/" element={
               <ProtectedRoute>
                 <Layout>
-                  <DashboardPage />
+                  <IndicadoresPage />
                 </Layout>
               </ProtectedRoute>
             } />
@@ -44,10 +42,10 @@ const App = () => (
                 </Layout>
               </ProtectedRoute>
             } />
-            <Route path="/dashboard" element={
+            <Route path="/indicadores" element={
               <ProtectedRoute>
                 <Layout>
-                  <DashboardPage />
+                  <IndicadoresPage />
                 </Layout>
               </ProtectedRoute>
             } />
@@ -65,13 +63,7 @@ const App = () => (
                 </Layout>
               </ProtectedRoute>
             } />
-            <Route path="/analise-indicadores" element={
-              <ProtectedRoute>
-                <Layout>
-                  <AnaliseIndicadoresPage />
-                </Layout>
-              </ProtectedRoute>
-            } />
+            {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
             {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
             <Route path="*" element={<NotFound />} />
           </Routes>

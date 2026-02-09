@@ -332,10 +332,9 @@ const DashboardPage = () => {
   respostasAgrupadas.push(...Array.from(gruposMap.values()));
 
   return (
-    <div className="min-h-screen bg-white text-black">
-      <div className="max-w-6xl mx-auto space-y-6 p-6">
+    <div className="space-y-6">
         <div className="flex justify-between items-center">
-          <h1 className="text-3xl font-bold">Dashboard</h1>
+          <h2 className="text-xl font-semibold">Dashboard</h2>
           <Button onClick={exportarParaExcel} className="gap-2">
             <Download className="h-4 w-4" />
             Exportar para Excel
@@ -511,7 +510,6 @@ const DashboardPage = () => {
             </div>
           </CardContent>
         </Card>
-      </div>
     </div>
   );
 };
