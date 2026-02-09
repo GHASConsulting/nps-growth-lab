@@ -94,7 +94,6 @@ const ConfigPage = () => {
       .insert([{
         nome: nomeCategoria,
         is_nps: isNPS,
-        user_id: userData.user.id
       }]);
 
     if (error) {
